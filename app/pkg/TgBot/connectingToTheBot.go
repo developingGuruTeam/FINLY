@@ -25,6 +25,17 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "hello world")
 
+		switch update.Message.Command() {
+		case "help":
+			msg.Text = "I understand /sayhi and /status."
+		case "sayhi":
+			msg.Text = "Hi :)"
+		case "status":
+			msg.Text = "I'm ok."
+		default:
+			msg.Text = "I don't know that command"
+		}
+
 		if _, err := bot.Send(msg); err != nil {
 
 			panic(err)
