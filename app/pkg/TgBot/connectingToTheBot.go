@@ -45,5 +45,6 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 			log.Fatalf("Failed to send message: %v", err)
 		}
 	}
+
 	return bot, nil
 }

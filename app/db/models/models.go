@@ -5,29 +5,36 @@ import (
 	"time"
 )
 
+// тип транзакций
 type Transactions struct {
-	*gorm.DB
-	ID            uint64
-	TelegramID    uint64
-	CreatedAt     time.Time
-	OperationType bool
-	Quantities    uint64
-	Category      string
-	Description   string
+	gorm.Model
+	ID            uint64     `gorm:"primaryKey;autoIncrement:true"`
+	TelegramID    uint64     `gorm:"foreignKey:telegramID"` // id пользователя
+	CreatedAt     time.Time  `gorm:"autoCreateTime"`        // дата/время создания
+	OperationType bool       // тип транзакции ( true - доход, false - расход)
+	Quantities    uint64     // количество (в валюте)
+	Category      Categories `gorm:"not null"` // категория транзакции
+	Description   string     // описание транзакции
 }
 
 type Users struct {
-	*gorm.DB
+	gorm.Model
 	TelegramID   uint64
 	Name         string
 	Transactions []Transactions
-	Сurrency     string
+	// валюта (RUB, USD, EUR, etc.)
+	Сurrency string
 }
 
-type Summary struct {
-	Startate     time.tine
-	EndDate      time.time
-	TotalIncowe  float64
-	TotalExpense float64
-	Profiti      int64
+type Categories struct {
+	gorm.Model
+	Category string `gorm:"uniqueIndex"`
 }
+
+//type Summary struct {
+//	Startate     time.Time
+//	EndDate      time.Time
+//	TotalIncowe  float64
+//	TotalExpense float64
+//	Profiti      int64
+//}
