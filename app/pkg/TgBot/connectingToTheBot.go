@@ -2,19 +2,20 @@ package TgBot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
 	"os"
 )
 
 func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to connect to Telegram bot API: %v", err)
 	}
 
 	bot.Debug = true
 
 	updateConfig := tgbotapi.NewUpdate(0)
-	updateConfig.Timeout = 60
+	updateConfig.Timeout = 15
 
 	updates := bot.GetUpdatesChan(updateConfig)
 
@@ -41,7 +42,7 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 
 		if _, err := bot.Send(msg); err != nil {
 
-			panic(err)
+			log.Fatalf("Failed to send message: %v", err)
 		}
 	}
 	return bot, nil
