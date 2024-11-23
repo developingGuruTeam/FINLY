@@ -30,6 +30,9 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 			msg.Text = "..."
 		case "hi":
 			msg.Text = "Даров :)"
+		case "start":
+			msg.Text = "Я ещё не совсем готов, но можно потестить меню"
+
 		case "bye":
 			msg.Text = "Давай делай падла!!"
 		default:
