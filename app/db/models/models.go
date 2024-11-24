@@ -9,21 +9,21 @@ import (
 type Transactions struct {
 	gorm.Model
 	ID            uint64     `gorm:"primaryKey;autoIncrement:true"`
-	TelegramID    uint64     `gorm:"foreignKey:telegramID"` // id пользователя
-	CreatedAt     time.Time  `gorm:"autoCreateTime"`        // дата/время создания
-	OperationType bool       // тип транзакции ( true - доход, false - расход)
-	Quantities    uint64     // количество (в валюте)
-	Category      Categories `gorm:"not null"` // категория транзакции
-	Description   string     // описание транзакции
+	TelegramID    uint64     `gorm:"not null"`       // Внешний ключ на Users.TelegramID
+	CreatedAt     time.Time  `gorm:"autoCreateTime"` // Дата/время создания
+	OperationType bool       // Тип транзакции (доход/расход)
+	Quantities    uint64     // Количество (в валюте)
+	CategoryID    uint       `gorm:"not null"`              // Внешний ключ на Categories
+	Category      Categories `gorm:"foreignKey:CategoryID"` // Связь с таблицей Categories
+	Description   string     // Описание транзакции
 }
 
 type Users struct {
 	gorm.Model
-	TelegramID   uint64
-	Name         string
-	Transactions []Transactions
-	// валюта (RUB, USD, EUR, etc.)
-	Сurrency string
+	TelegramID   uint64         `gorm:"uniqueIndex"` // Уникальный TelegramID для связи
+	Name         string         // Имя пользователя
+	Transactions []Transactions `gorm:"foreignKey:TelegramID;references:TelegramID"` // Указание внешнего ключа
+	Сurrency     string         // Валюта (RUB, USD, EUR)
 }
 
 type Categories struct {
