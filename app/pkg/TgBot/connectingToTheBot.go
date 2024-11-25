@@ -20,30 +20,25 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 
 	updates := bot.GetUpdatesChan(updateConfig)
 
-	// экземпляр TelegramStaticButtonCreator
-	buttonCreator := TelegramStaticButtonCreator{}
+	// старт всех кнопок
+	buttonCreator := TelegramButtonCreator{}
 
 	for update := range updates {
 		if update.Message != nil {
-			// выводит сообщение для статичного меню
-			mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите действие")
-			msg.ReplyMarkup = mainMenuKeyboard
-			if _, err := bot.Send(msg); err != nil {
-				log.Printf("Failed to send message with main menu buttons: %v", err)
-			}
-
-			// для того чтобы активировать inline кнопки со слэшем
-			inlineKeyboard := buttonCreator.CreateInlineInfoHelpButtons()
-			msgInline := tgbotapi.NewMessage(update.Message.Chat.ID, "") // затер сообщение для обработки инлайн кнопок?, здесь по идее должно отображаться баланс на данный момент
-			msgInline.ReplyMarkup = inlineKeyboard
-			if _, err := bot.Send(msgInline); err != nil {
-				log.Printf("Failed to send message with inline buttons: %v", err)
+			switch update.Message.Text {
+			case "/start":
+				// высылаем только при старте /start
+				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать!\nВыберите действие в меню ✏\n\nБазовые команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
+				msg.ReplyMarkup = mainMenuKeyboard
+				if _, err := bot.Send(msg); err != nil {
+					log.Printf("Failed to send message with main menu buttons: %v", err)
+				}
+			default:
+				// обработчик
+				PushOnButton(bot, update, buttonCreator)
 			}
 		}
-
-		// Обрабатываем нажатие на кнопки
-		PushOnButton(bot, update)
 	}
 
 	return bot, nil
