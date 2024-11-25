@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// подключение к тг и обработка обновлений
 func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
@@ -19,30 +20,24 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 
 	updates := bot.GetUpdatesChan(updateConfig)
 
+	// старт всех кнопок
+	buttonCreator := TelegramButtonCreator{}
+
 	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "hello world")
-
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = "..."
-		case "hi":
-			msg.Text = "Даров :)"
-		case "start":
-			msg.Text = "Я ещё не совсем готов, но можно потестить меню"
-
-		case "bye":
-			msg.Text = "Давай делай падла!!"
-		default:
-			msg.Text = "I don't know that command"
-		}
-
-		if _, err := bot.Send(msg); err != nil {
-
-			log.Fatalf("Failed to send message: %v", err)
+		if update.Message != nil {
+			switch update.Message.Text {
+			case "/start":
+				// высылаем только при старте /start
+				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать!\nВыберите действие в меню ✏\n\nБазовые команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
+				msg.ReplyMarkup = mainMenuKeyboard
+				if _, err := bot.Send(msg); err != nil {
+					log.Printf("Failed to send message with main menu buttons: %v", err)
+				}
+			default:
+				// обработчик
+				PushOnButton(bot, update, buttonCreator)
+			}
 		}
 	}
 
