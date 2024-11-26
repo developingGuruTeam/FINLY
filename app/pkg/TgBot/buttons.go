@@ -8,7 +8,7 @@ import (
 // интерфейс создания кнопок
 type ButtonCreator interface {
 	CreateMainMenuButtons() tgbotapi.ReplyKeyboardMarkup
-	CreateInlineButtons() tgbotapi.InlineKeyboardMarkup
+	//CreateInlineButtons() tgbotapi.InlineKeyboardMarkup
 }
 
 // структура интерфейса создания кнопок
@@ -56,16 +56,16 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 	)
 }
 
-// создание inline кнопок
-func (t TelegramButtonCreator) CreateInlineButtons() tgbotapi.InlineKeyboardMarkup {
-	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("info", "info"),
-			tgbotapi.NewInlineKeyboardButtonData("help", "help"),
-			tgbotapi.NewInlineKeyboardButtonData("hi", "hi"),
-		),
-	)
-}
+//// создание inline кнопок
+//func (t TelegramButtonCreator) CreateInlineButtons() tgbotapi.InlineKeyboardMarkup {
+//	return tgbotapi.NewInlineKeyboardMarkup(
+//		tgbotapi.NewInlineKeyboardRow(
+//			tgbotapi.NewInlineKeyboardButtonData("info", "info"),
+//			tgbotapi.NewInlineKeyboardButtonData("help", "help"),
+//			tgbotapi.NewInlineKeyboardButtonData("hi", "hi"),
+//		),
+//	)
+//}
 
 // рандомное сообщение для команды /hi
 func randomTextForHi() string {
@@ -79,7 +79,7 @@ func randomTextForHi() string {
 		"💰 Финансовый контроль — это просто. Поехали!", "💰 Посчитаем твои финансы и найдём резервы!",
 		"💰 Чем меньше траты, тем больше возможностей!", "💰 Успех начинается с грамотного управления финансами!",
 		"💰 Настройся на экономию и достигай целей!", "💰 Каждый шаг к учёту — шаг к финансовой свободе!",
-		"💰 Добро пожаловать в мир финансового порядка!", "💰 Везде нужен порядок. Особенно в деньгах",
+		"💰 Добро пожаловать в мир финансового порядка!", "💰 Везде нужен порядок. Особенно в деньгах!",
 	}
 	return hiText[rand.Intn(len(hiText))]
 }
