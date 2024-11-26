@@ -56,21 +56,21 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Te
 
 		// ОПИСАНИЕ ИНЛАЙН КОММАНД
 		case "/info":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Бот предназначен для:\n - Ведения учета доходов и расходов\n - Создания отчетов по различным критериям\n - Экономического анализа")
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📍 Бот предназначен для:\n ▪ Ведения учета доходов и расходов\n ▪ Создания отчетов по различным критериям\n ▪ Экономического анализа")
 			if _, err := bot.Send(msg); err != nil {
 				log.Printf("Failed to send /info message: %v", err)
 			}
 			handled = true
 
 		case "/help":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота\n/hi - приветственное сообщение от бота") // дописать нормальный хэлп
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📌 Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота") // дописать нормальный хэлп
 			if _, err := bot.Send(msg); err != nil {
 				log.Printf("Failed to send /help message: %v", err)
 			}
 			handled = true
 
 		case "/hi":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, randomTextForHi()) // как вариант
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, randomTextForHi()) // дописать нормальный хэлп
 			if _, err := bot.Send(msg); err != nil {
 				log.Printf("Failed to send /help message: %v", err)
 			}
