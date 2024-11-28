@@ -3,13 +3,23 @@ package main
 import (
 	"cachManagerApp/app/pkg/TgBot"
 	"cachManagerApp/database"
+	"github.com/joho/godotenv"
+	"log"
 )
 
 func main() {
-	TgBot.ConnectToTgBot()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Ошибка загрузки .env файла: %v", err)
+	}
 
-	database.Connect()
+	go func() {
+		if _, err := TgBot.ConnectToTgBot(); err != nil {
+			log.Fatalf("Ошибка подключения к Telegram боту: %v", err)
+		}
+	}()
 
-	// Создание таблиц в базе данных
-	database.AutoMigrate()
+	database.ConnectionDB()
+	log.Println("ДБ запущена")
+	// database.AutoMigrate()
 }

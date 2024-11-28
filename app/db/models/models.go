@@ -1,34 +1,30 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 // тип транзакций
 type Transactions struct {
-	gorm.Model
-	ID            uint64     `gorm:"primaryKey;autoIncrement:true"`
-	TelegramID    uint64     `gorm:"not null"`       // Внешний ключ на Users.TelegramID
-	CreatedAt     time.Time  `gorm:"autoCreateTime"` // Дата/время создания
-	OperationType bool       // Тип транзакции (доход/расход)
-	Quantities    uint64     // Количество (в валюте)
-	CategoryID    uint       `gorm:"not null"`              // Внешний ключ на Categories
-	Category      Categories `gorm:"foreignKey:CategoryID"` // Связь с таблицей Categories
-	Description   string     // Описание транзакции
+	ID            uint64
+	TelegramID    uint64
+	CreatedAt     time.Time
+	OperationType bool
+	Quantities    uint64
+	CategoryID    uint
+	Category      Categories
+	Description   string
 }
 
 type Users struct {
-	gorm.Model
-	TelegramID   uint64         `gorm:"uniqueIndex"` // Уникальный TelegramID для связи
-	Name         string         // Имя пользователя
-	Transactions []Transactions `gorm:"foreignKey:TelegramID;references:TelegramID"` // Указание внешнего ключа
-	Сurrency     string         // Валюта (RUB, USD, EUR)
+	TelegramID   uint64
+	Name         string
+	Transactions []Transactions
+	Сurrency     string
 }
 
 type Categories struct {
-	gorm.Model
-	Category string `gorm:"uniqueIndex"`
+	Category string
 }
 
 //type Summary struct {
