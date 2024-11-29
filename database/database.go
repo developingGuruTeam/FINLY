@@ -1,6 +1,7 @@
 package database
 
 import (
+	"cachManagerApp/app/db/models"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -22,10 +23,21 @@ func ConnectionDB() {
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
 	)
-	_, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Не удалось подключиться к БД", err)
 		return
 	}
-	fmt.Println("Подключение к БЛ успешно")
+
+	DB = db
+	fmt.Println("Подключение к БД успешно")
+
+	err = db.AutoMigrate(&models.Users{}, &models.Categories{}, &models.Transactions{})
+	if err != nil {
+		log.Fatal("Ошибка при миграции", err)
+		return
+	}
+
+	fmt.Println("Миграции успешно выполнены")
 }
