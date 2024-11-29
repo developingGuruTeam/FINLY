@@ -1,17 +1,20 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/pkg/logger"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 	"os"
 )
 
 // подключение к тг и обработка обновлений
 func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
+	log := logger.GetLogger()
+
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatalf("Failed to connect to Telegram bot API: %v", err)
 	}
+	log.Info("Successfully connected to Telegram bot API!")
 
 	bot.Debug = true
 
