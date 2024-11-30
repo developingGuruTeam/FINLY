@@ -13,7 +13,7 @@ var DB *gorm.DB
 
 func ConnectionDB() {
 
-	fmt.Printf("DB_HOST=%s, DB_USER=%s,DB_PASSWORD=%s, DB_NAME=%s, DB_PORT=%s\n",
+	log.Printf("DB_HOST=%s, DB_USER=%s,DB_PASSWORD=%s, DB_NAME=%s, DB_PORT=%s\n",
 		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -31,7 +31,7 @@ func ConnectionDB() {
 	}
 
 	DB = db
-	fmt.Println("Подключение к БД успешно")
+	log.Println("Подключение к БД успешно")
 
 	err = db.AutoMigrate(&models.Users{}, &models.Categories{}, &models.Transactions{})
 	if err != nil {
