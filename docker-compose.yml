@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres1234
+      POSTGRES_DB: cashManager
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cash_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: postgres1234
+      DB_NAME: cashManager
+      DB_PORT: 5432
+    depends_on:
+      - db
+    ports:
+      - "8080:8080" # Порт, который слушает приложение (опционально)
+    networks:
+      - cash_network
+
+volumes:
+  postgres_data:
+
+networks:
+  cash_network:
