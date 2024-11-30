@@ -28,7 +28,7 @@ type Categories struct {
 	Category string `gorm:"not null" json:"category"`
 }
 
-//type Summary struct {
+//  type Summary struct {
 //	Startate     time.Time
 //	EndDate      time.Time
 //	TotalIncowe  float64
