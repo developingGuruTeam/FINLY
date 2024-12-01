@@ -2,7 +2,6 @@ package main
 
 import (
 	"cachManagerApp/app/pkg/TgBot"
-	"cachManagerApp/database"
 	"github.com/joho/godotenv"
 	"log"
 	"sync"
@@ -31,7 +30,7 @@ func main() {
 			log.Fatalf("Ошибка подключения к Telegram боту: %v", err)
 		}
 	}()
-	database.ConnectionDB()
+	//database.ConnectionDB()
 	log.Println("БД запущена")
 
 	wg.Wait()

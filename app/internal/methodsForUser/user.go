@@ -10,9 +10,12 @@ import (
 
 type UsersHandlers interface {
 	PostUser(update tgbotapi.Update) error
+	UpdateUserName(update tgbotapi.Update) error
 }
 
-type UserMethod struct{}
+type UserMethod struct {
+	WaitingUpdate bool
+}
 
 func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 	user := models.Users{
@@ -36,4 +39,21 @@ func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 
 	log.Println("Новый пользователь успешно добавлен.")
 	return nil
+}
+
+func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
+	if u.WaitingUpdate {
+		newUserName := update.Message.Text
+		res := database.DB.Model(&models.Users{}).
+			Where("telegram_id = ?", uint64(update.Message.Chat.ID)).
+			Update("name", newUserName)
+		if res.Error != nil {
+			log.Printf("Ошибка обновления имени пользователя: %v", res.Error)
+			return res.Error
+		}
+		log.Println("Имя пользователя успешно обновлено.")
+		u.WaitingUpdate = false // Сбрасываем флаг ожидания
+		return nil
+	}
+	return errors.New("no user name update expected")
 }

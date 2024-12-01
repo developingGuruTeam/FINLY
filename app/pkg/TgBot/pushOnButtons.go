@@ -1,6 +1,7 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/internal/methodsForUser"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 )
@@ -76,6 +77,15 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Te
 			}
 			handled = true
 
+		case "🎭 Изменить имя":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите Ваше новое имя")
+			if _, err := bot.Send(msg); err != nil {
+				log.Printf("Failed to send /help message: %v", err)
+			}
+			user := methodsForUser.UserMethod{}
+			user.WaitingUpdate = true
+
+			handled = true
 		}
 
 		// Если команда или кнопка не обработаны, отправляем сообщение об ошибке
