@@ -1,6 +1,7 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/internal/methodsForUser"
 	"cachManagerApp/app/pkg/logger"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"os"
@@ -32,6 +33,12 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 			case "/start":
 				// высылаем только при старте /start
 				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
+				userHandler := &methodsForUser.UserMethod{}
+				if err := userHandler.PostUser(update); err != nil {
+					log.Printf("Ошибка при добавлении пользователя: %v", err)
+				} else {
+					log.Println("Пользователь успешно добавлен.")
+				}
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать!\nВыберите действие в меню ✏\n\nБазовые команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
 				msg.ReplyMarkup = mainMenuKeyboard
 				if _, err := bot.Send(msg); err != nil {
