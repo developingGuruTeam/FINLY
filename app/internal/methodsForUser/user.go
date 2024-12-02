@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+//go:generate mockery --name=UsersHandlers --output=../tests/mocks --with-expecter
 type UsersHandlers interface {
 	PostUser(update tgbotapi.Update) error
 	UpdateUserName(update tgbotapi.Update) error
