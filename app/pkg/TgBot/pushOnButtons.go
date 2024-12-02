@@ -113,6 +113,16 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		userStates[chatID] = UserResponse{Action: "change_name"}
 		mu.Unlock()
 		handled = true
+
+	case "💱 Изменить валюту":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите валюту")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		userStates[chatID] = UserResponse{Action: "change_currency"}
+		mu.Unlock()
+		handled = true
 	}
 
 	// Если команда или кнопка не обработаны, отправляем сообщение об ошибке
@@ -145,6 +155,17 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		msg := tgbotapi.NewMessage(chatID, "Ваше имя успешно изменено.")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Ошибка отправки сообщения об изменении имени: %v", err)
+		}
+
+	case "change_currency":
+		user := methodsForUser.UserMethod{}
+		if err := user.UpdateUserCurrency(update); err != nil {
+			log.Printf("Ошибка обновления валюты: %v", err)
+			return
+		}
+		msg := tgbotapi.NewMessage(chatID, "Ваша валюта изменена.")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Ошибка отправки сообщения об изменении валюты: %v", err)
 		}
 	}
 

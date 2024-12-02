@@ -11,6 +11,7 @@ import (
 type UsersHandlers interface {
 	PostUser(update tgbotapi.Update) error
 	UpdateUserName(update tgbotapi.Update) error
+	UpdateUserCurrency(update tgbotapi.Update) error
 }
 
 type UserMethod struct{}
@@ -57,5 +58,26 @@ func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
 
 	log.Printf("Имя пользователя с Telegram ID %d успешно обновлено на '%s'.", update.Message.Chat.ID, newUserName)
 
+	return nil
+}
+
+func (u *UserMethod) UpdateUserCurrency(update tgbotapi.Update) error {
+	newCurrency := update.Message.Text
+
+	res := database.DB.Model(&models.Users{}).
+		Where("telegram_id = ?", uint64(update.Message.Chat.ID)).
+		Update("currency", newCurrency)
+
+	if res.Error != nil {
+		log.Printf("Ошибка обновления валюты: %v", res.Error)
+		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		log.Println("Не найден пользователь с указанным telegram_id.")
+		return errors.New("пользователь не найден")
+	}
+
+	log.Printf("Валюта успешна обновлена на '%s'.", newCurrency)
 	return nil
 }
