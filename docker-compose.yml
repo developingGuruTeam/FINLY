@@ -31,7 +31,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8080" # Порт, который слушает приложение (опционально)
+      - "8080:8080"
     networks:
       - cash_network
 

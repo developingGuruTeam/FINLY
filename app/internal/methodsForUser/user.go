@@ -13,9 +13,7 @@ type UsersHandlers interface {
 	UpdateUserName(update tgbotapi.Update) error
 }
 
-type UserMethod struct {
-	WaitingUpdate bool
-}
+type UserMethod struct{}
 
 func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 	user := models.Users{
@@ -42,18 +40,22 @@ func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 }
 
 func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
-	if u.WaitingUpdate {
-		newUserName := update.Message.Text
-		res := database.DB.Model(&models.Users{}).
-			Where("telegram_id = ?", uint64(update.Message.Chat.ID)).
-			Update("name", newUserName)
-		if res.Error != nil {
-			log.Printf("Ошибка обновления имени пользователя: %v", res.Error)
-			return res.Error
-		}
-		log.Println("Имя пользователя успешно обновлено.")
-		u.WaitingUpdate = false // Сбрасываем флаг ожидания
-		return nil
+	newUserName := update.Message.Text
+
+	res := database.DB.Model(&models.Users{}).
+		Where("telegram_id = ?", uint64(update.Message.Chat.ID)).
+		Update("name", newUserName)
+	if res.Error != nil {
+		log.Printf("Ошибка обновления имени пользователя: %v", res.Error)
+		return res.Error
 	}
-	return errors.New("no user name update expected")
+	// Проверяем, обновлена ли хотя бы одна строка
+	if res.RowsAffected == 0 {
+		log.Println("Не найден пользователь с указанным telegram_id.")
+		return errors.New("пользователь не найден")
+	}
+
+	log.Printf("Имя пользователя с Telegram ID %d успешно обновлено на '%s'.", update.Message.Chat.ID, newUserName)
+
+	return nil
 }
