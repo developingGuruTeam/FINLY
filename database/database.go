@@ -33,7 +33,7 @@ func ConnectionDB() {
 	DB = db
 	log.Println("Подключение к БД успешно")
 
-	err = db.AutoMigrate(&models.Users{}, &models.Categories{}, &models.Transactions{})
+	err = db.AutoMigrate(&models.Users{}, &models.Transactions{})
 	if err != nil {
 		log.Fatal("Ошибка при миграции", err)
 		return
