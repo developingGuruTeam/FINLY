@@ -11,7 +11,7 @@ type Transactions struct {
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
 	OperationType bool      `gorm:"not null" json:"operation_type"`
 	Quantities    uint64    `gorm:"not null" json:"quantities"`
-	CategoryID    uint      `gorm:"not null" json:"category_id"`
+	Category      string    `gorm:"not null" json:"category_id"`
 	Description   string    `gorm:"type:text" json:"description"`
 }
 
