@@ -31,6 +31,9 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 		if update.Message != nil {
 			switch update.Message.Text {
 			case "/start":
+				// планировщик отложенных уведомлений запускаем для пользователя вместе со стартом бота
+				ScheduleNotifications(bot, update.Message.Chat.ID, update.Message.From.UserName)
+
 				// высылаем только при старте /start
 				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
 				userHandler := &methodsForUser.UserMethod{}
