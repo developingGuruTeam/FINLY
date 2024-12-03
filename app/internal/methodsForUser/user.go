@@ -2,17 +2,20 @@ package methodsForUser
 
 import (
 	"cachManagerApp/app/db/models"
+	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 )
 
+//go:generate mockery --name=UsersHandlers --output=../tests/mocks --with-expecter
 type UsersHandlers interface {
 	PostUser(update tgbotapi.Update) error
 	UpdateUserName(update tgbotapi.Update) error
 	UpdateUserCurrency(update tgbotapi.Update) error
 }
+
+var log = logger.GetLogger()
 
 type UserMethod struct{}
 
