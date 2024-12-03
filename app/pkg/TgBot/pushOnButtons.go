@@ -2,8 +2,8 @@ package TgBot
 
 import (
 	"cachManagerApp/app/internal/methodsForUser"
+	"cachManagerApp/app/pkg/logger"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 	"sync"
 )
 
@@ -12,6 +12,7 @@ type UserResponse struct {
 }
 
 var (
+	log        = logger.GetLogger()
 	userStates = make(map[int64]UserResponse) // мапа для хранения состояния пользователей
 	mu         sync.Mutex                     // мьютекс для синхронизации доступа к мапе
 )
