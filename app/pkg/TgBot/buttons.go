@@ -28,6 +28,27 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 	)
 }
 
+func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("📥 Заработная плата"),
+			tgbotapi.NewKeyboardButton("📤 Дополнительный доход"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("📥 Доход от бизнеса"),
+			tgbotapi.NewKeyboardButton("📤 Доход от инвестиций"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("📥 Гос выплаты"),
+			tgbotapi.NewKeyboardButton("📤 Продажа имущества"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("📥 Прочее"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
 // cоздание кнопок меню отчета по строкам
 func (t TelegramButtonCreator) CreateReportsMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
