@@ -1,8 +1,6 @@
 package TgBot
 
 import (
-	"cachManagerApp/app/internal/methodsForTransaction"
-	"cachManagerApp/app/internal/methodsForUser"
 	"cachManagerApp/app/pkg/logger"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"sync"
@@ -17,9 +15,7 @@ type UserResponse struct {
 }
 
 var (
-
-	
-  log        = logger.GetLogger()
+	log               = logger.GetLogger()
 	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
 	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
@@ -66,7 +62,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📤 Расход":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📤 Введите сумму расхода")
+		expensesMenu := buttonCreator.CreateExpensesMenuButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⚙ Выберите категорию")
+		msg.ReplyMarkup = expensesMenu
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send message for expense: %v", err)
 		}
@@ -106,9 +104,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			log.Printf("Failed to send /info message: %v", err)
 		}
 		handled = true
-
+	// дописать нормальный хэлп!!!!!!
 	case "/help":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📌 Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота") // дописать нормальный хэлп
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📌 Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
@@ -143,7 +141,6 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 		// приходы
-
 	case "📥 Заработная плата":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму заработной платы.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
@@ -154,8 +151,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Дополнительный доход":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дополнительного дохода.\nЧерез запятую можно добавить комментарий")
+	case "📤 Побочный доход":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дополнительного дохода\n(подработка, фриланс).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
@@ -175,7 +172,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📥 Доход от инвестиций":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от инвестиций.\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от инвестиций\n(проценты по вкладам, дивиденды).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
@@ -184,8 +181,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📥 Государственные выплаты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму государственных выплат.\nЧерез запятую можно добавить комментарий")
+	case "📥 Гос.выплаты":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму государственных выплат\n(пенсии, судсидии).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
@@ -205,12 +202,83 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📥 Прочее":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочего дохода.\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих поступлений.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
 		mu.Lock()
 		transactionStates[chatID] = TransactionResponse{Action: "other_income"}
+		mu.Unlock()
+		handled = true
+
+		// расходные операции
+	case "📤 Бытовые траты":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму базовых трат\n(еда, напитки, проезд).\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "basic_expense"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Регулярные платежи":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму регулярного платежа\n(кредиты, налоги, аренда,\nкоммунальные платежи).\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "regular_expense"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Одежда":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму трат на обновление гардероба.\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "clothes"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Здоровье":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите расходы на поддержание здоровья\n(аптеки, обследования, визиты к врачам).\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "health"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Досуг и образование":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму расхода\n(книги, подписки, курсы, хобби,\n музеи, кино, рестораны).\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "leisure_education"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Инвестиции":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму затраченную на инвестиции\n(вклады, акции, автомобили,\nнедвижимость, предметы роcкоши).\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "investment_expense"}
+		mu.Unlock()
+		handled = true
+
+	case "📤 Прочее":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих расходов\nЧерез запятую можно добавить комментарий")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /help message: %v", err)
+		}
+		mu.Lock()
+		transactionStates[chatID] = TransactionResponse{Action: "other_expense"}
 		mu.Unlock()
 		handled = true
 	}
@@ -222,109 +290,4 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			log.Printf("Failed to send unknown command message: %v", err)
 		}
 	}
-}
-
-func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, transResp TransactionResponse) {
-	chatID := update.Message.Chat.ID
-
-	switch transResp.Action {
-	case "salary":
-		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Зарплата"
-		if err := transaction.PostIncome(update, category); err != nil {
-			log.Printf("Failed to save salary: %v", err)
-		}
-		msg := tgbotapi.NewMessage(chatID, "Зарплата сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send salary message: %v", err)
-		}
-
-	case "additional_income":
-		trasaction := methodsForTransaction.TransactionsMethod{}
-		category := "Дополнительный доход"
-		if err := trasaction.PostIncome(update, category); err != nil {
-			log.Printf("Failed to save additional income: %v", err)
-		}
-		msg := tgbotapi.NewMessage(chatID, "Дополнительный доход сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send additional income message: %v", err)
-		}
-
-	case "business_income":
-		trasaction := methodsForTransaction.TransactionsMethod{}
-		category := "Доход от бизнеса"
-		if err := trasaction.PostIncome(update, category); err != nil {
-			log.Printf("Failed to save business income: %v", err)
-		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от бизнеса сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send business income message: %v", err)
-		}
-
-	case "investment_income":
-		trasaction := methodsForTransaction.TransactionsMethod{}
-		category := "Доход от инвестиций"
-		if err := trasaction.PostIncome(update, category); err != nil {
-			log.Printf("Failed to save investment income: %v", err)
-		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от инвестиций сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send investment income message: %v", err)
-		}
-
-	case "other_income":
-		trasaction := methodsForTransaction.TransactionsMethod{}
-		category := "Прочие доходы"
-		if err := trasaction.PostIncome(update, category); err != nil {
-			log.Printf("Failed to save other income: %v", err)
-		}
-		msg := tgbotapi.NewMessage(chatID, "Прочие доходы сохранены.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send other income message: %v", err)
-		}
-	}
-	mu.Lock()
-	delete(transactionStates, chatID) // удаляем состояние после обработки
-	mu.Unlock()
-
-}
-
-func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp UserResponse) {
-	chatID := update.Message.Chat.ID
-
-	switch userResp.Action {
-	case "income":
-		amount := update.Message.Text
-		msg := tgbotapi.NewMessage(chatID, "Сумма прихода "+amount+" сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Ошибка отправки сообщения о приходе: %v", err)
-		}
-
-	case "change_name":
-		// Обновление имени пользователя в БД
-		user := methodsForUser.UserMethod{}
-		if err := user.UpdateUserName(update); err != nil {
-			log.Printf("Ошибка обновления имени пользователя: %v", err)
-			return
-		}
-		msg := tgbotapi.NewMessage(chatID, "Ваше имя успешно изменено.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Ошибка отправки сообщения об изменении имени: %v", err)
-		}
-
-	case "change_currency":
-		user := methodsForUser.UserMethod{}
-		if err := user.UpdateUserCurrency(update); err != nil {
-			log.Printf("Ошибка обновления валюты: %v", err)
-			return
-		}
-		msg := tgbotapi.NewMessage(chatID, "Ваша валюта изменена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Ошибка отправки сообщения об изменении валюты: %v", err)
-		}
-	}
-
-	mu.Lock()
-	delete(userStates, chatID) // удаляем состояние после обработки
-	mu.Unlock()
 }
