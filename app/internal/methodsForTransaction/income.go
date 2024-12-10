@@ -18,7 +18,7 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 
 	sum, err := strconv.Atoi(msg[0])
 	if err != nil {
-		log.Error("Ошибка преобразования суммы: %v", err)
+		log.Errorf("Ошибка преобразования суммы: %v", err)
 		return err
 	}
 
@@ -38,7 +38,7 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 	}
 
 	if err := database.DB.Create(&transaction).Error; err != nil {
-		log.Error("Ошибка добавления новой транзакции: %v", err)
+		log.Errorf("Ошибка добавления новой транзакции: %v", err)
 		return err
 
 	}

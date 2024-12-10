@@ -17,9 +17,7 @@ type UserResponse struct {
 }
 
 var (
-
-	
-  log        = logger.GetLogger()
+	log               = logger.GetLogger()
 	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
 	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
