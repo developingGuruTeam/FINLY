@@ -1,0 +1,7 @@
+name: cash-manager-pipeline
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
