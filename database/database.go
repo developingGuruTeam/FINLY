@@ -3,53 +3,41 @@ package database
 import (
 	"cachManagerApp/app/db/models"
 	"fmt"
-	"log"
-	"os"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"os"
 )
 
 var DB *gorm.DB
 
-// Подключение к базе данных
-func Connect() {
-	// Получение данных для подключения из переменных окружения
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		getEnv("DB_HOST", "localhost"),    // Адрес хоста
-		getEnv("DB_USER", "postgres"),     // Пользователь
-		getEnv("DB_PASSWORD", "08092001"), // Пароль
-		getEnv("DB_NAME", "cash_manager"), // Имя базы данных
-		getEnv("DB_PORT", "5432"),         // Порт
+func ConnectionDB() {
+
+	log.Printf("DB_HOST=%s, DB_USER=%s,DB_PASSWORD=%s, DB_NAME=%s, DB_PORT=%s\n",
+		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_PORT"),
 	)
 
-	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
+		log.Fatal("Не удалось подключиться к БД", err)
+		return
 	}
 
-	log.Println("Успешное подключение к базе данных!")
-}
+	DB = db
+	log.Println("Подключение к БД успешно")
 
-// Вспомогательная функция для получения переменных окружения
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
-}
-
-func AutoMigrate() {
-	err := DB.AutoMigrate(
-		&models.Users{},
-		&models.Transactions{},
-		&models.Categories{},
-	)
+	err = db.AutoMigrate(&models.Users{}, &models.Transactions{})
 	if err != nil {
-		log.Fatalf("Ошибка при создании таблиц: %v", err)
+		log.Fatal("Ошибка при миграции", err)
+		return
 	}
 
-	log.Println("Таблицы успешно созданы!")
+	fmt.Println("Миграции успешно выполнены")
 }
