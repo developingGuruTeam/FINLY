@@ -51,7 +51,7 @@ func (transactions *TransactionsMethod) PostExpense(update tgbotapi.Update, cate
 	}
 
 	if err := database.DB.Create(&transaction).Error; err != nil {
-		log.Error("Ошибка добавления новой транзакции: %v", err)
+		log.Errorf("Ошибка добавления новой транзакции: %v", err)
 		return err
 
 	}
