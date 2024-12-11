@@ -8,4 +8,5 @@ type TransactionsMethod struct{}
 
 type TransactionsHandlers interface {
 	PostIncome(update tgbotapi.Update, category string) error
+	PostExpense(update tgbotapi.Update, category string) error
 }
