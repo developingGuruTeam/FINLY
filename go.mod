@@ -14,10 +14,7 @@ require (
 )
 
 require (
-
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
-	github.com/go-co-op/gocron v1.37.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
