@@ -13,13 +13,25 @@ import (
 
 func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, category string) error {
 	log := logger.GetLogger()
+	var sum int
+	var err error
+	var userText string
 
-	msg := strings.Split(update.Message.Text, ", ")
-
-	sum, err := strconv.Atoi(msg[0])
-	if err != nil {
-		log.Errorf("Ошибка преобразования суммы: %v", err)
-		return err
+	// проверка есть ли описание
+	if strings.Contains(update.Message.Text, ",") {
+		msg := strings.Split(update.Message.Text, ", ")
+		sum, err = strconv.Atoi(msg[0])
+		userText = msg[1]
+		if err != nil {
+			log.Infof("Ошибка преобразования суммы: %v", err)
+			return err
+		}
+	} else {
+		sum, err = strconv.Atoi(update.Message.Text)
+		if err != nil {
+			log.Infof("Ошибка преобразования суммы: %v", err)
+			return err
+		}
 	}
 
 	transaction := models.Transactions{
@@ -28,8 +40,9 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 		OperationType: true,
 		Quantities:    uint64(sum),
 		Category:      category,
-		Description:   msg[1],
+		Description:   userText,
 	}
+
 	var transactionExist models.Transactions
 	res := database.DB.Where("telegram_id = ? AND created_at = ?", transaction.TelegramID, transaction.CreatedAt).First(&transactionExist).Error
 	if res == nil {
