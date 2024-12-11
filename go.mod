@@ -3,6 +3,8 @@ module cachManagerApp
 go 1.23.2
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/go-co-op/gocron v1.37.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
@@ -12,9 +14,7 @@ require (
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-co-op/gocron v1.37.0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
