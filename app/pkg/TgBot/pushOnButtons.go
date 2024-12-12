@@ -311,6 +311,41 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		_, _ = bot.Send(msg)
 		handled = true
 
+	case "📈 Отчет за неделю":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeWeekAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		// Формируем текст отчёта
+		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	case "📈 Отчет за месяц":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeMonthAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		// Формируем текст отчёта
+		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
 	}
 
 	// Если команда или кнопка не обработаны, отправляем сообщение об ошибке
