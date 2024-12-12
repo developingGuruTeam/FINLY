@@ -1,7 +1,9 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
 	"cachManagerApp/app/pkg/logger"
+	"cachManagerApp/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"sync"
 )
@@ -281,6 +283,34 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		transactionStates[chatID] = TransactionResponse{Action: "other_expense"}
 		mu.Unlock()
 		handled = true
+
+	case "💵 Отчет по доходам":
+		incomes := buttonCreator.CreateIncomeAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период отчета")
+		msg.ReplyMarkup = incomes
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+		handled = true
+
+	case "📈 Отчет за день":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeDayAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		// Формируем текст отчёта
+		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
 	}
 
 	// Если команда или кнопка не обработаны, отправляем сообщение об ошибке
