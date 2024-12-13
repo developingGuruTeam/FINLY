@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// хендлер доходов
 type IncomeAnalyticHandlers interface {
 	IncomeDayAnalytic(update tgbotapi.Update) ([]models.Transactions, error)
 	IncomeWeekAnalytic(update tgbotapi.Update) (map[string]uint64, error)
