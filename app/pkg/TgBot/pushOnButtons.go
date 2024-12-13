@@ -343,7 +343,6 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			return
 		}
 
-		// Формируем текст отчёта
 		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions)
 		msg := tgbotapi.NewMessage(chatID, report)
 		_, _ = bot.Send(msg)

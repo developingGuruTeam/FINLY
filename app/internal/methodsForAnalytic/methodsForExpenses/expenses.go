@@ -13,6 +13,7 @@ type ExpensesHandler struct {
 }
 
 // хендлер расходов
+//go:generate mockery --name=ExpenseAnalyticHandler --output=../tests/mocks --with-expecter
 type ExpenseAnalyticHandler interface {
 	ExpenseDayAnalytic(update tgbotapi.Update) ([]models.Transactions, error)
 	ExpenseWeekAnalytic(update tgbotapi.Update) (map[string]uint64, error)
