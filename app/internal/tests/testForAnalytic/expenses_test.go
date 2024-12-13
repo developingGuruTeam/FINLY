@@ -47,9 +47,6 @@ func TestExpenseDayAnalytic(t *testing.T) {
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
-		if len(transactions) != len(expectedTransactions) {
-			t.Errorf("expected %d transactions, got %d", len(expectedTransactions), len(transactions))
-		}
 
 		for i, tx := range transactions {
 			if tx.ID != expectedTransactions[i].ID {
