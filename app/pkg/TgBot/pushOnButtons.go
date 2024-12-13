@@ -1,7 +1,10 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
+	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
 	"cachManagerApp/app/pkg/logger"
+	"cachManagerApp/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"sync"
 )
@@ -280,6 +283,121 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Lock()
 		transactionStates[chatID] = TransactionResponse{Action: "other_expense"}
 		mu.Unlock()
+		handled = true
+
+	// ОТЧЕТ ДОХОДЫ
+	case "💵 Отчет по доходам":
+		incomes := buttonCreator.CreateIncomeAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период отчета")
+		msg.ReplyMarkup = incomes
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+		handled = true
+
+	case "📈 Отчет за день":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeDayAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		// Формируем текст отчёта
+		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	case "📈 Отчет за неделю":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeWeekAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		// Формируем текст отчёта
+		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	case "📈 Отчет за месяц":
+		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+
+		// Получаем данные за день
+		transactions, err := analyticHandler.IncomeMonthAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+
+		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	// ОТЧЕТ ПО РАСХОДАМ
+	case "💸 Отчет по расходам":
+		incomes := buttonCreator.CreateExpensesAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период отчета")
+		msg.ReplyMarkup = incomes
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+		handled = true
+
+	case "📉 Отчет за день":
+		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		expenses, err := dbConn.ExpenseDayAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных за день: %v", err)
+			return
+		}
+		report := methodsForExpenses.GenerateDailyExpenseReport(expenses)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	case "📉 Отчет за неделю":
+		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		expenses, err := dbConn.ExpenseWeekAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных по расходам за неделю: %v", err)
+			return
+		}
+		report := methodsForExpenses.GenerateWeeklyExpensesReport(expenses)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
+		handled = true
+
+	case "📉 Отчет за месяц":
+		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		expenses, err := dbConn.ExpenseMonthAnalytic(update)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			log.Printf("Ошибка получения данных по расходам за неделю: %v", err)
+			return
+		}
+		report := methodsForExpenses.GenerateMonthlyExpensesReport(expenses)
+		msg := tgbotapi.NewMessage(chatID, report)
+		_, _ = bot.Send(msg)
 		handled = true
 	}
 
