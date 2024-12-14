@@ -78,7 +78,7 @@ func (t TelegramButtonCreator) CreateReportsMenuButtons() tgbotapi.ReplyKeyboard
 			tgbotapi.NewKeyboardButton("💸 Отчет по расходам"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📑 Анализ"),
+			tgbotapi.NewKeyboardButton("🧑‍💻 Аналитика"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -105,6 +105,31 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("📉 Отчет за месяц"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
+func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("🛍 По категориям"),
+			tgbotapi.NewKeyboardButton("🤑 Аналитика сальдо"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
+func (t TelegramButtonCreator) CreateCategoryAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("💅 неделя"),
+			tgbotapi.NewKeyboardButton("🤳 месяц"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)

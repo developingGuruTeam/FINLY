@@ -399,6 +399,31 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		msg := tgbotapi.NewMessage(chatID, report)
 		_, _ = bot.Send(msg)
 		handled = true
+
+	// аналитика
+	case "🧑‍💻 Аналитика":
+		analyse := buttonCreator.CreateSuperAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите категорию аналитики")
+		msg.ReplyMarkup = analyse
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+		handled = true
+
+	case "🛍 По категориям":
+		command := "🛍 По категориям"
+		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "💅 неделя":
+		command := "💅 неделя"
+		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "🤳 месяц":
+		command := "🤳 месяц"
+		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
 	}
 
 	// Если команда или кнопка не обработаны, отправляем сообщение об ошибке
