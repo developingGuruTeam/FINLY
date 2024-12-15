@@ -35,4 +35,5 @@ func main() {
 	log.Println("БД запущена")
 
 	wg.Wait()
+
 }
