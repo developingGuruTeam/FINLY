@@ -22,7 +22,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 	case "💅 неделя":
 		redisClient, err := redisDB.NewRedisClient()
 		if err != nil {
-			log.Info("Failed to connect to Redis: %v", err)
+			log.Infof("Failed to connect to Redis: %v", err)
 		}
 		key := update.Message.Text + update.Message.Chat.UserName
 		report, err := redisClient.Client.Get(context.Background(), key).Result()
@@ -46,7 +46,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		key := update.Message.Text + update.Message.Chat.UserName
 		redisClient, err := redisDB.NewRedisClient()
 		if err != nil {
-			log.Info("Failed to connect to Redis: %v", err)
+			log.Infof("Failed to connect to Redis: %v", err)
 		}
 		report, err := redisClient.Client.Get(context.Background(), key).Result()
 		if err == redis.Nil {
