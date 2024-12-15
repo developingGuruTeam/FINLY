@@ -135,6 +135,18 @@ func (t TelegramButtonCreator) CreateCategoryAnalyticButtons() tgbotapi.ReplyKey
 	)
 }
 
+func (t TelegramButtonCreator) CreateSaldoAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("💲 неделя"),
+			tgbotapi.NewKeyboardButton("💰 месяц"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
 // cоздание кнопок меню настроек по строкам
 func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(

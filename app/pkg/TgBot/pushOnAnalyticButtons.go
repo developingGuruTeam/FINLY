@@ -64,5 +64,13 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, report)
 		_, _ = bot.Send(msg)
+
+	case "сальдо":
+		saldo := buttonCreator.CreateSaldoAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период")
+		msg.ReplyMarkup = saldo
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
 	}
 }
