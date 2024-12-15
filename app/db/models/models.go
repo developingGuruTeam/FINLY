@@ -21,10 +21,17 @@ type Users struct {
 	Currency   string `gorm:"not null" json:"currency"`
 }
 
-//  type Summary struct {
-//	Startate     time.Time
-//	EndDate      time.Time
-//	TotalIncowe  float64
-//	TotalExpense float64
-//	Profit       int64
-//}
+type CategorySummary struct {
+	Category string
+	Amount   uint64
+}
+
+type Summary struct {
+	TotalIncome       uint64
+	TotalExpense      uint64
+	Profit            int64
+	TopIncome         CategorySummary
+	TopExpense        CategorySummary
+	IncomeCategories  []CategorySummary
+	ExpenseCategories []CategorySummary
+}
