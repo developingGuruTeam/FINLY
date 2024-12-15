@@ -8,6 +8,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+// анализ по категориям за неделю
 func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 
 	if database.DB == nil {
@@ -54,10 +55,10 @@ func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 	// Расходы по категориям
 	if len(totalWeekExpenses) > 0 {
 		report += "💸 Вы жадно тратили по категориям:\n"
-		for category, amount := range totalWeekExpenses {
-			report += fmt.Sprintf("   ▪ %s: %d\n", category, amount)
+		for category := range totalWeekExpenses {
+			report += fmt.Sprintf("   ▪ %s\n", category)
 		}
-		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s (%d)\n", topExpenseCategory, maxExpense)
+		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s - %d\n", topExpenseCategory, maxExpense)
 	} else {
 		report += "💸 Расходов за неделю не обнаружено.\n"
 	}
@@ -67,16 +68,17 @@ func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 	// Доходы по категориям
 	if len(totalWeekIncomes) > 0 {
 		report += "💵 Вы безжалостно зарабатывали по категориям:\n"
-		for category, amount := range totalWeekIncomes {
-			report += fmt.Sprintf("   ▪ %s: %d\n", category, amount)
+		for category, _ := range totalWeekIncomes {
+			report += fmt.Sprintf("   ▪ %s\n", category)
 		}
-		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s (%d)\n", topIncomeCategory, maxIncome)
+		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s - %d\n", topIncomeCategory, maxIncome)
 	} else {
 		report += "💵 Доходов за неделю не обнаружено.\n"
 	}
 	return report, nil
 }
 
+// анализ по категориям за месяц
 func AnalyseByCategoriesMonth(update tgbotapi.Update) (string, error) {
 
 	if database.DB == nil {
@@ -123,10 +125,10 @@ func AnalyseByCategoriesMonth(update tgbotapi.Update) (string, error) {
 	// Расходы по категориям
 	if len(totalMonthExpenses) > 0 {
 		report += "💸 Вы жадно тратили по категориям:\n"
-		for category, amount := range totalMonthExpenses {
-			report += fmt.Sprintf("   ▪ %s: %d\n", category, amount)
+		for category := range totalMonthExpenses {
+			report += fmt.Sprintf("   ▪ %s\n", category)
 		}
-		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s (%d)\n", topExpenseCategory, maxExpense)
+		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s - %d\n", topExpenseCategory, maxExpense)
 	} else {
 		report += "💸 Расходов за месяц не обнаружено.\n"
 	}
@@ -136,10 +138,10 @@ func AnalyseByCategoriesMonth(update tgbotapi.Update) (string, error) {
 	// Доходы по категориям
 	if len(totalMonthIncomes) > 0 {
 		report += "💵 Вы безжалостно зарабатывали по категориям:\n"
-		for category, amount := range totalMonthIncomes {
-			report += fmt.Sprintf("   ▪ %s: %d\n", category, amount)
+		for category := range totalMonthIncomes {
+			report += fmt.Sprintf("   ▪ %s\n", category)
 		}
-		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s (%d)\n", topIncomeCategory, maxIncome)
+		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s - %d\n", topIncomeCategory, maxIncome)
 	} else {
 		report += "💵 Доходов за месяц не обнаружено.\n"
 	}
