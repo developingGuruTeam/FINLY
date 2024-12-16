@@ -39,8 +39,8 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 
 		if amount > summary.TopIncome.Amount {
 			summary.TopIncome = models.CategorySummary{
-				category,
-				amount,
+				Category: category,
+				Amount:   amount,
 			}
 		}
 	}
@@ -51,8 +51,8 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 
 		if amount > summary.TopExpense.Amount {
 			summary.TopExpense = models.CategorySummary{
-				category,
-				amount,
+				Category: category,
+				Amount:   amount,
 			}
 		}
 	}
