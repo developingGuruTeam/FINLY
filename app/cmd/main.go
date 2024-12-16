@@ -1,19 +1,15 @@
 package main
 
 import (
+	"cachManagerApp/app/config"
 	"cachManagerApp/app/pkg/TgBot"
 	"cachManagerApp/database"
-	"github.com/joho/godotenv"
 	"log"
 	"sync"
 )
 
 func main() {
-	// загружаем переменные окружения
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Ошибка загрузки .env файла: %v", err)
-	}
+	config.LoadEnviroment()
 	var wg sync.WaitGroup
 
 	wg.Add(1)

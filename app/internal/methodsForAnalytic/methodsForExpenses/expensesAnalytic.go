@@ -13,6 +13,7 @@ type ExpensesHandler struct {
 }
 
 // хендлер расходов
+//
 //go:generate mockery --name=ExpenseAnalyticHandler --output=../tests/mocks --with-expecter
 type ExpenseAnalyticHandler interface {
 	ExpenseDayAnalytic(update tgbotapi.Update) ([]models.Transactions, error)
@@ -30,7 +31,7 @@ func (exp *ExpensesHandler) ExpenseDayAnalytic(update tgbotapi.Update) ([]models
 	err := exp.DB.Where("telegram_id = ? AND operation_type = ? AND created_at BETWEEN ? AND ?",
 		update.Message.Chat.ID, false, startOfDay, endOfDay).Find(&transactions).Error
 	if err != nil {
-		return nil, fmt.Errorf("error getting transactions: %v", err)
+		return nil, fmt.Errorf("ошибка заполнения модели транзакции в обработке аналитики по расходам за день: %v", err)
 	}
 
 	return transactions, nil
@@ -75,7 +76,7 @@ func (exp *ExpensesHandler) ExpenseWeekAnalytic(update tgbotapi.Update) (map[str
 		Group("category").
 		Scan(&result).Error
 	if err != nil {
-		return nil, fmt.Errorf("error getting transactions: %v", err)
+		return nil, fmt.Errorf("ошибка в заполнении транзакции по расходам за неделю: %v", err)
 	}
 
 	categorySummary := make(map[string]uint64)
@@ -120,7 +121,7 @@ func (exp *ExpensesHandler) ExpenseMonthAnalytic(update tgbotapi.Update) (map[st
 		Group("category").
 		Scan(&results).Error
 	if err != nil {
-		return nil, fmt.Errorf("error getting transactions: %v", err)
+		return nil, fmt.Errorf("ошибка по расходам за месяц: %v", err)
 	}
 
 	categorySummary := make(map[string]uint64)

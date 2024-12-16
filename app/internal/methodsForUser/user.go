@@ -5,6 +5,7 @@ import (
 	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"errors"
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -53,6 +54,8 @@ func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
 		log.Printf("Ошибка обновления имени пользователя: %v", res.Error)
 		return res.Error
 	}
+
+	fmt.Println("Все норм")
 	// Проверяем, обновлена ли хотя бы одна строка
 	if res.RowsAffected == 0 {
 		log.Println("Не найден пользователь с указанным telegram_id.")

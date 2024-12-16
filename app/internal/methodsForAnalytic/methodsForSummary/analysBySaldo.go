@@ -96,6 +96,7 @@ func GenerateWeeklySaldoReport(sum models.Summary) string {
 	return report
 }
 
+// анализ сальдо за месяц
 func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
 	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
