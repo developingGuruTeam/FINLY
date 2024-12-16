@@ -1,6 +1,7 @@
 package methodsForSummary
 
 import (
+	"cachManagerApp/app/db/models"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
 	"cachManagerApp/database"
@@ -8,72 +9,161 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+var (
+	summary = models.Summary{}
+)
+
 // анализ сальдо за неделю
-func AnalyseBySaldoWeek(update tgbotapi.Update) (string, error) {
-
-	if database.DB == nil {
-		return "", fmt.Errorf("база данных не инициализирована")
-	}
-
+func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
 	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
 
+	if database.DB == nil {
+		return models.Summary{}, fmt.Errorf("база данных не инициализирована в сальдо за неделю")
+	}
+
 	totalWeekExpenses, err := analyticExpenses.ExpenseWeekAnalytic(update)
 	if err != nil {
-		return "", fmt.Errorf("ошибка при анализе расходов за неделю: %v", err)
+		return models.Summary{}, fmt.Errorf("ошибка при анализе расходов за неделю: %v", err)
 	}
 
 	totalWeekIncomes, err := analyticIncomes.IncomeWeekAnalytic(update)
 	if err != nil {
-		return "", fmt.Errorf("ошибка при анализе доходов за неделю: %v", err)
+		return models.Summary{}, fmt.Errorf("ошибка при анализе доходов за неделю: %v", err)
 	}
 
-	// Определяем категории с наибольшими расходами и доходами
-	var topExpenseCategory string
-	var maxExpense uint64
-
-	var topIncomeCategory string
-	var maxIncome uint64
-
-	// Суммируем расходы и находим топовую категорию
-	for category, amount := range totalWeekExpenses {
-		if amount > maxExpense {
-			maxExpense = amount
-			topExpenseCategory = category
-		}
-	}
-	// Суммируем доходы и находим топовую категорию
+	// подсчет общих доходов
 	for category, amount := range totalWeekIncomes {
-		if amount > maxIncome {
-			maxIncome = amount
-			topIncomeCategory = category
+		summary.TotalIncome += amount
+		summary.IncomeCategories = append(summary.IncomeCategories, models.CategorySummary{Category: category, Amount: amount})
+
+		if amount > summary.TopIncome.Amount {
+			summary.TopIncome = models.CategorySummary{
+				category,
+				amount,
+			}
 		}
 	}
-	// Генерация итогового текста
-	report := "📊 Ваш анализ за неделю по категориям:\n\n"
 
-	// Расходы по категориям
-	if len(totalWeekExpenses) > 0 {
-		report += "💸 Вы жадно тратили по категориям:\n"
-		for category := range totalWeekExpenses {
-			report += fmt.Sprintf("   ▪ %s\n", category)
+	for category, amount := range totalWeekExpenses {
+		summary.TotalExpense += amount
+		summary.ExpenseCategories = append(summary.ExpenseCategories, models.CategorySummary{Category: category, Amount: amount})
+
+		if amount > summary.TopExpense.Amount {
+			summary.TopExpense = models.CategorySummary{
+				category,
+				amount,
+			}
 		}
-		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s - %d\n", topExpenseCategory, maxExpense)
+	}
+
+	summary.Profit = int64(summary.TotalIncome) - int64(summary.TotalExpense)
+	return summary, nil
+}
+
+func GenerateWeeklySaldoReport(sum models.Summary) string {
+	report := "📊 Ваш анализ за неделю:\n\n"
+
+	// расходы
+	report += "💸 Расходы по категориям:\n"
+	if len(sum.ExpenseCategories) > 0 {
+		for _, category := range sum.ExpenseCategories {
+			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
+		}
+		report += fmt.Sprintf("\n🔴 Больше всего расходов в категории: %s (%d)\n", sum.TopExpense.Category, sum.TopExpense.Amount)
 	} else {
-		report += "💸 Расходов за неделю не обнаружено.\n"
+		report += "   ▪ Нет расходов за неделю.\n"
 	}
 
-	report += "\n"
-
-	// Доходы по категориям
-	if len(totalWeekIncomes) > 0 {
-		report += "💵 Вы безжалостно зарабатывали по категориям:\n"
-		for category, _ := range totalWeekIncomes {
-			report += fmt.Sprintf("   ▪ %s\n", category)
+	// Доходы
+	report += "\n💵 Доходы по категориям:\n"
+	if len(sum.IncomeCategories) > 0 {
+		for _, category := range sum.IncomeCategories {
+			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
 		}
-		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s - %d\n", topIncomeCategory, maxIncome)
+		report += fmt.Sprintf("\n🟢 Больше всего доходов в категории: %s (%d)\n", sum.TopIncome.Category, sum.TopIncome.Amount)
 	} else {
-		report += "💵 Доходов за неделю не обнаружено.\n"
+		report += "   ▪ Нет доходов за неделю.\n"
 	}
-	return report, nil
+
+	// Итоговая прибыль или убыток
+	if sum.Profit >= 0 {
+		report += fmt.Sprintf("\n✅ Итоговая прибыль за неделю: %d\n", sum.Profit)
+	} else {
+		report += fmt.Sprintf("\n❌ Итоговый убыток за неделю: %d\n", -sum.Profit)
+	}
+
+	return report
+}
+
+func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
+	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
+	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
+
+	if database.DB == nil {
+		return models.Summary{}, fmt.Errorf("ошибка подключения к БД в аналитике сальдо")
+	}
+
+	totalExpenses, err := analyticExpenses.ExpenseMonthAnalytic(update)
+	if err != nil {
+		return models.Summary{}, fmt.Errorf("ошибка в вычислении расходов")
+	}
+	totalIncomes, err := analyticIncomes.IncomeMonthAnalytic(update)
+	if err != nil {
+		return models.Summary{}, fmt.Errorf("ошибка в вычислении доходов")
+	}
+
+	for category, amount := range totalExpenses {
+		summary.TotalExpense += amount
+		summary.ExpenseCategories = append(summary.ExpenseCategories, models.CategorySummary{category, amount})
+		if amount > summary.TopExpense.Amount {
+			summary.TopExpense = models.CategorySummary{category, amount}
+		}
+	}
+
+	for category, amount := range totalIncomes {
+		summary.TotalIncome += amount
+		summary.IncomeCategories = append(summary.IncomeCategories, models.CategorySummary{category, amount})
+		if amount > summary.TopIncome.Amount {
+			summary.TopIncome = models.CategorySummary{category, amount}
+		}
+	}
+
+	summary.Profit = int64(summary.TotalIncome) - int64(summary.TotalExpense)
+	return summary, nil
+}
+
+func GenerateMonthlySaldoReport(sum models.Summary) string {
+	report := "📊 Ваш анализ за месяц:\n\n"
+
+	// расходы
+	report += "💸 Расходы по категориям:\n"
+	if len(sum.ExpenseCategories) > 0 {
+		for _, category := range sum.ExpenseCategories {
+			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
+		}
+		report += fmt.Sprintf("\n🔴 Больше всего расходов в категории: %s (%d)\n", sum.TopExpense.Category, sum.TopExpense.Amount)
+	} else {
+		report += "   ▪ Нет расходов за месяц.\n"
+	}
+
+	// Доходы
+	report += "\n💵 Доходы по категориям:\n"
+	if len(sum.IncomeCategories) > 0 {
+		for _, category := range sum.IncomeCategories {
+			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
+		}
+		report += fmt.Sprintf("\n🟢 Больше всего доходов в категории: %s (%d)\n", sum.TopIncome.Category, sum.TopIncome.Amount)
+	} else {
+		report += "   ▪ Нет доходов за месяц.\n"
+	}
+
+	// Итоговая прибыль или убыток
+	if sum.Profit >= 0 {
+		report += fmt.Sprintf("\n✅ Итоговая прибыль за месяц: %d\n", sum.Profit)
+	} else {
+		report += fmt.Sprintf("\n❌ Итоговый убыток за месяц: %d\n", -sum.Profit)
+	}
+
+	return report
 }
