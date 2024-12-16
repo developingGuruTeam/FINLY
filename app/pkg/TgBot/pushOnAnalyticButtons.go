@@ -64,5 +64,31 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, report)
 		_, _ = bot.Send(msg)
+
+	case "сальдо":
+		saldo := buttonCreator.CreateSaldoAnalyticButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период")
+		msg.ReplyMarkup = saldo
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+
+	case "💲 неделя":
+		summary, err := methodsForSummary.AnalyseBySaldoWeek(update)
+		if err != nil {
+			log.Printf("Failed to get summary in the week period: %v", err)
+		}
+		response := methodsForSummary.GenerateWeeklySaldoReport(summary)
+		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
+		_, _ = bot.Send(newMsg)
+
+	case "💰 месяц":
+		summary, err := methodsForSummary.AnalyseBySaldoMonth(update)
+		if err != nil {
+			log.Printf("Failed to get summary in the month period: %v", err)
+		}
+		response := methodsForSummary.GenerateMonthlySaldoReport(summary)
+		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
+		_, _ = bot.Send(newMsg)
 	}
 }

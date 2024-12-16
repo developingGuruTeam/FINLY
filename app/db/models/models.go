@@ -15,17 +15,20 @@ type Transactions struct {
 	Description   string    `gorm:"type:text" json:"description"`
 }
 
+// структура пользователя
 type Users struct {
 	TelegramID uint64 `gorm:"primary_key" json:"telegram_id"`
 	Name       string `gorm:"not null" json:"name"`
 	Currency   string `gorm:"not null" json:"currency"`
 }
 
+// структура категории
 type CategorySummary struct {
 	Category string
 	Amount   uint64
 }
 
+// структура для сальдо
 type Summary struct {
 	TotalIncome       uint64
 	TotalExpense      uint64
