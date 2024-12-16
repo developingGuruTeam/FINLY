@@ -118,7 +118,9 @@ func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 		summary.TotalExpense += amount
 		summary.ExpenseCategories = append(summary.ExpenseCategories, models.CategorySummary{category, amount})
 		if amount > summary.TopExpense.Amount {
-			summary.TopExpense = models.CategorySummary{category, amount}
+			summary.TopExpense = models.CategorySummary{
+				Category: category,
+				Amount:   amount}
 		}
 	}
 
@@ -126,7 +128,7 @@ func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 		summary.TotalIncome += amount
 		summary.IncomeCategories = append(summary.IncomeCategories, models.CategorySummary{category, amount})
 		if amount > summary.TopIncome.Amount {
-			summary.TopIncome = models.CategorySummary{category, amount}
+			summary.TopIncome = models.CategorySummary{Category: category, Amount: amount}
 		}
 	}
 
