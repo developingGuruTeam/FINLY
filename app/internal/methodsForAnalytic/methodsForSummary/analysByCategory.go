@@ -50,7 +50,7 @@ func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 		}
 	}
 	// Генерация итогового текста
-	report := "📊 Ваш анализ за неделю по категориям:\n\n"
+	report := fmt.Sprintf("%s Ваш анализ за неделю по категориям:\n\n", update.Message.Chat.LastName)
 
 	// Расходы по категориям
 	if len(totalWeekExpenses) > 0 {

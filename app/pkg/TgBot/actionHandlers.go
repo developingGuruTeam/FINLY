@@ -3,6 +3,7 @@ package TgBot
 import (
 	"cachManagerApp/app/internal/methodsForTransaction"
 	"cachManagerApp/app/internal/methodsForUser"
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -195,7 +196,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		if err := user.UpdateUserName(update); err != nil {
 			log.Errorf("Ошибка обновления имени пользователя: %v", err)
 		}
-		msg := tgbotapi.NewMessage(chatID, "Ваше имя успешно изменено.")
+		msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s! Ваше имя успешно изменено.", update.Message.Text))
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Ошибка отправки сообщения об изменении имени: %v", err)
 		}

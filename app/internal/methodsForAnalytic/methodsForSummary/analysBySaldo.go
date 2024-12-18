@@ -62,35 +62,35 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 }
 
 func GenerateWeeklySaldoReport(sum models.Summary) string {
-	report := "📊 Ваш анализ за неделю:\n\n"
+	report := "📊 Ваше сальдо за неделю:\n\n"
 
 	// расходы
-	report += "💸 Расходы по категориям:\n"
+	report += "За неделю Вы тратили по категориям:\n"
 	if len(sum.ExpenseCategories) > 0 {
 		for _, category := range sum.ExpenseCategories {
 			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
 		}
-		report += fmt.Sprintf("\n🔴 Больше всего расходов в категории: %s (%d)\n", sum.TopExpense.Category, sum.TopExpense.Amount)
+		report += fmt.Sprintf("\n😱 Больше всего расходов в категории: %s (%d)\n", sum.TopExpense.Category, sum.TopExpense.Amount)
 	} else {
 		report += "   ▪ Нет расходов за неделю.\n"
 	}
 
 	// Доходы
-	report += "\n💵 Доходы по категориям:\n"
+	report += "\nДоходы по категориям:\n"
 	if len(sum.IncomeCategories) > 0 {
 		for _, category := range sum.IncomeCategories {
 			report += fmt.Sprintf("   ▪ %s: %d\n", category.Category, category.Amount)
 		}
-		report += fmt.Sprintf("\n🟢 Больше всего доходов в категории: %s (%d)\n", sum.TopIncome.Category, sum.TopIncome.Amount)
+		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s (%d)\n", sum.TopIncome.Category, sum.TopIncome.Amount)
 	} else {
 		report += "   ▪ Нет доходов за неделю.\n"
 	}
 
 	// Итоговая прибыль или убыток
 	if sum.Profit >= 0 {
-		report += fmt.Sprintf("\n✅ Итоговая прибыль за неделю: %d\n", sum.Profit)
+		report += fmt.Sprintf("\n💰 Итоговая прибыль за неделю: %d\n", sum.Profit)
 	} else {
-		report += fmt.Sprintf("\n❌ Итоговый убыток за неделю: %d\n", -sum.Profit)
+		report += fmt.Sprintf("\n😭 Итоговый убыток за неделю: %d\n", -sum.Profit)
 	}
 
 	return report
