@@ -23,7 +23,7 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("📊 Отчеты"),
-			tgbotapi.NewKeyboardButton("⚙ Настройки"),
+			tgbotapi.NewKeyboardButton("⚙️ Настройки"),
 		),
 	)
 }
@@ -31,19 +31,19 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📥 Заработная плата"),
-			tgbotapi.NewKeyboardButton("📤 Побочный доход"),
+			tgbotapi.NewKeyboardButton("💳 Заработная плата"),
+			tgbotapi.NewKeyboardButton("💱 Дополнительный доход"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📥 Доход от бизнеса"),
-			tgbotapi.NewKeyboardButton("📤 Доход от инвестиций"),
+			tgbotapi.NewKeyboardButton("😎 Доход от бизнеса"),
+			tgbotapi.NewKeyboardButton("🏦 Доход от инвестиций"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📥 Гос. выплаты"),
-			tgbotapi.NewKeyboardButton("📤 Продажа имущества"),
+			tgbotapi.NewKeyboardButton("👮‍♂️ Гос. выплаты"),
+			tgbotapi.NewKeyboardButton("🏠 Продажа имущества"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📥 Прочее"),
+			tgbotapi.NewKeyboardButton("📲 Прочее"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -52,19 +52,19 @@ func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardM
 func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📤 Бытовые траты"),
-			tgbotapi.NewKeyboardButton("📤 Регулярные платежи"),
+			tgbotapi.NewKeyboardButton("🦑 Бытовые траты"),
+			tgbotapi.NewKeyboardButton("🫡 Регулярные платежи"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📤 Одежда"),
-			tgbotapi.NewKeyboardButton("📤 Здоровье"),
+			tgbotapi.NewKeyboardButton("👘 Одежда"),
+			tgbotapi.NewKeyboardButton("💪 Здоровье"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📤 Досуг и образование"),
-			tgbotapi.NewKeyboardButton("📤 Инвестиции"),
+			tgbotapi.NewKeyboardButton("👨‍🏫 Досуг и образование"),
+			tgbotapi.NewKeyboardButton("🚀 Инвестиции"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📤 Прочее"),
+			tgbotapi.NewKeyboardButton("🥷 Прочее"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)

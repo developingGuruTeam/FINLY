@@ -82,7 +82,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "⚙ Настройки":
+	case "⚙️ Настройки":
 		settingsMenu := buttonCreator.CreateSettingsMenuButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⚙ Выберите параметры")
 		msg.ReplyMarkup = settingsMenu
@@ -144,7 +144,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 		// приходы
-	case "📥 Заработная плата":
+	case "💳 Заработная плата":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму заработной платы.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -154,7 +154,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Побочный доход":
+	case "💱 Дополнительный доход":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дополнительного дохода\n(подработка, фриланс).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -164,7 +164,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📥 Доход от бизнеса":
+	case "😎 Доход от бизнеса":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от бизнеса.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -174,7 +174,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📥 Доход от инвестиций":
+	case "🏦 Доход от инвестиций":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от инвестиций\n(проценты по вкладам, дивиденды).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -184,7 +184,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📥 Гос. выплаты":
+	case "👮‍ Гос. выплаты":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму государственных выплат\n(пенсии, судсидии).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -194,7 +194,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Продажа имущества":
+	case "🏠 Продажа имущества":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму продажи имущества.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -204,7 +204,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📥 Прочее":
+	case "📲 Прочее":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих поступлений.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -215,7 +215,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 		// расходные операции
-	case "📤 Бытовые траты":
+	case "🦑 Бытовые траты":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму базовых трат\n(еда, напитки, проезд).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -225,7 +225,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Регулярные платежи":
+	case "🫡 Регулярные платежи":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму регулярного платежа\n(кредиты, налоги, аренда,\nкоммунальные платежи).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -235,7 +235,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Одежда":
+	case "👘 Одежда":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму трат на обновление гардероба.\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -245,7 +245,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Здоровье":
+	case "💪 Здоровье":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите расходы на поддержание здоровья\n(аптеки, обследования, визиты к врачам).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -255,7 +255,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Досуг и образование":
+	case "👨‍🏫 Досуг и образование":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму расхода\n(книги, подписки, курсы, хобби,\n музеи, кино, рестораны).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -265,7 +265,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Инвестиции":
+	case "🚀 Инвестиции":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму затраченную на инвестиции\n(вклады, акции, автомобили,\nнедвижимость, предметы роcкоши).\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -275,7 +275,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📤 Прочее":
+	case "🥷 Прочее":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих расходов\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -438,6 +438,14 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	case "💰 месяц":
 		command := "💰 месяц"
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "👨‍🔬 Экспертная аналитика":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Экспертная аналитика выйдет вместе с обновлением приложения 20.01.2025")
+		msg.ReplyMarkup = msg
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
 		handled = true
 	}
 
