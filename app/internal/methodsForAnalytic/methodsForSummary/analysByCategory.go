@@ -143,7 +143,7 @@ func AnalyseByCategoriesMonth(update tgbotapi.Update) (string, error) {
 		}
 		report += fmt.Sprintf("\n🤑 Больше всего доходов в категории: %s - %d\n", topIncomeCategory, maxIncome)
 	} else {
-		report += "💵 Доходов за месяц не обнаружено.\n"
+		report += "💵 Доходов нет\n"
 	}
 	return report, nil
 }
