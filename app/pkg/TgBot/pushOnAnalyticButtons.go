@@ -6,7 +6,6 @@ import (
 	"cachManagerApp/database"
 	redisDB "cachManagerApp/database/redis"
 	"context"
-	"fmt"
 	"github.com/go-redis/redis/v8"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"time"
@@ -78,7 +77,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 			log.Printf("Failed to send main menu: %v", err)
 		}
 
-	case "💲 неделя":
+	case "💲Сальдо за неделю":
 		summary, err := methodsForSummary.AnalyseBySaldoWeek(update)
 		if err != nil {
 			log.Printf("Failed to get summary in the week period: %v", err)
@@ -88,7 +87,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		newMsg.ParseMode = "Markdown"
 		_, _ = bot.Send(newMsg)
 
-	case "💰 месяц":
+	case "💰Сальдо за месяц":
 		summary, err := methodsForSummary.AnalyseBySaldoMonth(update)
 		if err != nil {
 			log.Printf("Failed to get summary in the month period: %v", err)
@@ -107,6 +106,5 @@ func CurrencyFromChatID(chatID int64) (string, error) {
 	if result.Error != nil {
 		return "", result.Error
 	}
-	fmt.Println(user.Currency)
 	return user.Currency, nil
 }
