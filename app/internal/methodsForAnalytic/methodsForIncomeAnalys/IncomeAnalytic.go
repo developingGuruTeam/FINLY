@@ -37,7 +37,7 @@ func (an *AnalyticHandler) IncomeDayAnalytic(update tgbotapi.Update) ([]models.T
 	return transactions, nil
 }
 
-func GenerateDailyIncomeReport(transactions []models.Transactions) string {
+func GenerateDailyIncomeReport(transactions []models.Transactions, currency string) string {
 	if len(transactions) == 0 {
 		return "📈 Сегодня у вас не было доходов."
 	}
@@ -55,7 +55,7 @@ func GenerateDailyIncomeReport(transactions []models.Transactions) string {
 		totalIncome += t.Quantities
 	}
 
-	report += fmt.Sprintf("💵 Итого доходов за день: %d\n", totalIncome)
+	report += fmt.Sprintf("💵 Итого доходов за день: %d %s\n", totalIncome, currency)
 	return report
 }
 
@@ -86,7 +86,7 @@ func (an *AnalyticHandler) IncomeWeekAnalytic(update tgbotapi.Update) (map[strin
 	return categorySummary, nil
 }
 
-func GenerateWeeklyIncomeReport(categorySummary map[string]uint64) string {
+func GenerateWeeklyIncomeReport(categorySummary map[string]uint64, currency string) string {
 	if len(categorySummary) == 0 {
 		return "📊 За прошедшую неделю доходы отсутствуют."
 	}
@@ -99,7 +99,7 @@ func GenerateWeeklyIncomeReport(categorySummary map[string]uint64) string {
 		totalIncome += total
 	}
 
-	report += fmt.Sprintf("\n💵 Общий доход за неделю составил: %d", totalIncome)
+	report += fmt.Sprintf("\n💵 Общий доход за неделю составил: %d %s", totalIncome, currency)
 	return report
 }
 
@@ -135,7 +135,7 @@ func (a *AnalyticHandler) IncomeMonthAnalytic(update tgbotapi.Update) (map[strin
 	return categorySummary, totalIncome, nil
 }
 
-func GenerateMonthlyIncomeReport(categorySummary map[string]uint64) string {
+func GenerateMonthlyIncomeReport(categorySummary map[string]uint64, currency string) string {
 	categoryDetails := map[string]string{
 		"Заработная плата":    "🔵",
 		"Побочный доход":      "🔴",
@@ -143,7 +143,7 @@ func GenerateMonthlyIncomeReport(categorySummary map[string]uint64) string {
 		"Гос. выплаты":        "🟢",
 		"Продажа имущества":   "🟠",
 		"Доход от инвестиций": "🟣",
-		"Прочее":              "⚪️",
+		"Прочие доходы":       "⚪️",
 	}
 
 	if len(categorySummary) == 0 {
@@ -166,7 +166,7 @@ func GenerateMonthlyIncomeReport(categorySummary map[string]uint64) string {
 		}
 	}
 
-	report += fmt.Sprintf("\n💸 Общий доход: %d", totalIncome)
+	report += fmt.Sprintf("\n💸 Общий доход: %d %s", totalIncome, currency)
 
 	return report
 }

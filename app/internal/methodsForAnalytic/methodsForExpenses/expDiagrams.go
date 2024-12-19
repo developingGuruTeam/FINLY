@@ -7,11 +7,16 @@ import (
 	"net/url"
 )
 
-// GenerateExpensePieChartURL создает URL для диаграммы расходов с фиксированными цветами и процентами
+// создание диаграммы
 func GenerateExpensePieChartURL(categorySummary map[string]uint64) (string, error) {
 	labels := []string{}
 	values := []int{}
+	colors := []string{}
 	var totalExpense uint64
+
+	if len(labels) == 0 {
+		return "", fmt.Errorf("Нет данных для построения диаграмм")
+	}
 
 	categoryColors := map[string]string{
 		"Бытовые траты":       "#4A90E2", // синий
@@ -28,21 +33,16 @@ func GenerateExpensePieChartURL(categorySummary map[string]uint64) (string, erro
 		totalExpense += value
 	}
 
-	// преобразуем суммы в целые %%
+	// преобразуем суммы в целые %% учитывая только не нули
 	for category, value := range categorySummary {
-		if value > 0 { // Учитываем только ненулевые категории
+		if value > 0 {
 			labels = append(labels, category)
 			percentage := int(math.Round((float64(value) / float64(totalExpense)) * 100)) // округление без дробей
 			values = append(values, percentage)
 		}
 	}
 
-	if len(labels) == 0 {
-		return "", fmt.Errorf("нет данных для построения диаграммы")
-	}
-
 	// присваиваем цвета для категорий
-	colors := []string{}
 	for _, category := range labels {
 		if color, exists := categoryColors[category]; exists {
 			colors = append(colors, color)
@@ -53,7 +53,7 @@ func GenerateExpensePieChartURL(categorySummary map[string]uint64) (string, erro
 
 	// то, из чего получается диаграмма
 	chartData := map[string]interface{}{
-		"type": "doughnut", // тип
+		"type": "doughnut", // тип графика  - pie, doughnut, bar, horizontalBar
 		"data": map[string]interface{}{
 			"labels": labels,
 			"datasets": []map[string]interface{}{
@@ -66,10 +66,10 @@ func GenerateExpensePieChartURL(categorySummary map[string]uint64) (string, erro
 		"options": map[string]interface{}{
 			"plugins": map[string]interface{}{
 				"legend": map[string]interface{}{
-					"display": false, // Полностью отключаем легенду
+					"display": false, // отключаем легенду, только она какого-то черта не отключается
 				},
 				"datalabels": map[string]interface{}{
-					"formatter": "function(value) { return value + '%'; }", // Формат отображения: проценты
+					"formatter": "function(value) { return value + '%'; }", // формат отображения: проценты, только почему-то проценты не вылазят
 				},
 			},
 		},

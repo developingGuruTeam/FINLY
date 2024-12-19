@@ -215,7 +215,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "📲 Прочее":
+	case "⚪️ Прочие доходы":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих поступлений.\n\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -286,7 +286,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "🔻 Прочие расходы":
+	case "⚪️ Прочие расходы":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих расходов\n\nЧерез запятую можно добавить комментарий")
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
@@ -319,7 +319,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Формируем текст отчёта
-		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions)
+		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
 		_, _ = bot.Send(msg)
 		handled = true
@@ -337,7 +337,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Формируем текст отчёта
-		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(transactions)
+		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(transactions, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
 		_, _ = bot.Send(msg)
 		handled = true
@@ -355,7 +355,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Генерируем текстовый отчёт
-		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions)
+		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions, currency)
 
 		// Генерируем URL диаграммы
 		chartURL, err := methodsForIncomeAnalys.GenerateIncomePieChartURL(transactions, totalIncome)
