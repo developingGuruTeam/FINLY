@@ -321,6 +321,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		// Формируем текст отчёта
 		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
+		msg.ParseMode = "Markdown"
 		_, _ = bot.Send(msg)
 		handled = true
 
@@ -396,6 +397,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		report := methodsForExpenses.GenerateDailyExpenseReport(expenses, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
+		msg.ParseMode = "Markdown"
 		_, _ = bot.Send(msg)
 		handled = true
 

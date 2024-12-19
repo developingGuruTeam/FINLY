@@ -40,22 +40,33 @@ func (exp *ExpensesHandler) ExpenseDayAnalytic(update tgbotapi.Update) ([]models
 
 func GenerateDailyExpenseReport(expenses []models.Transactions, currency string) string {
 	if len(expenses) == 0 {
-		return "📉 Сегодня у вас не было расходов."
+		return "📉 За сегодня расходов нет."
 	}
 
-	report := "📉 Отчёт за день:\n\n"
+	report := "📉 *Отчёт за день (расходы)*\n\n"
 	var totalExpenses uint64
 
 	for _, exp := range expenses {
-		report += fmt.Sprintf("▪ Категория: %s\n", exp.Category)
-		report += fmt.Sprintf("   Сумма: %d\n", exp.Quantities)
+		// +3 часа к времени чтобы было по мск делаю временно. НАДО В БД ПОСТАВИТЬ НАШЕ ВРЕМЯ по умолчанию!!! либо как-то к юсеру привязаться
+		localTime := exp.CreatedAt.Add(3 * time.Hour)
+		formattedTime := localTime.Format("15:04")
+
+		report += fmt.Sprintf("▪ *%s*\n", exp.Category)
+		report += fmt.Sprintf("%d %s 📝 _%v_", exp.Quantities, currency, formattedTime)
+		// сокращаем коммент пользователя на вывод
 		if exp.Description != "" {
-			report += fmt.Sprintf("   Комментарий: %s\n", exp.Description)
+			decs := exp.Description
+			runes := []rune(decs)
+			if len([]rune(decs)) > 32 {
+				decs = string(runes[:32])
+			}
+
+			report += fmt.Sprintf(" _%s_", decs)
 		}
 		report += "\n"
 		totalExpenses += exp.Quantities
 	}
-	report += fmt.Sprintf("💸 Итого расходов за день: %d %s\n", totalExpenses, currency)
+	report += fmt.Sprintf("\n💸 Итого расходов за день:\n*%d* %s\n", totalExpenses, currency)
 	return report
 }
 
