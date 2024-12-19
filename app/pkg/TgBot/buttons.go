@@ -151,6 +151,20 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 	)
 }
 
+// кнопки с уведомлениями
+func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("📅 Регулярный платёж"),
+			tgbotapi.NewKeyboardButton("🎯 Накопления"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("🛒 Одно напоминание"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
 //// создание inline кнопок
 //func (t TelegramButtonCreator) CreateInlineButtons() tgbotapi.InlineKeyboardMarkup {
 //	return tgbotapi.NewInlineKeyboardMarkup(

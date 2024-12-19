@@ -537,6 +537,27 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			log.Printf("Failed to send main menu: %v", err)
 		}
 		handled = true
+
+	case "📅 Регулярный платёж":
+		command := "📅 Регулярный платёж"
+		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "🎯 Накопления":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /info message: %v", err)
+		}
+		handled = true
+
+	case "🛒 Одно напоминание":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /info message: %v", err)
+		}
+		handled = true
 	}
 
 	// Если команда или кнопка не обработаны, отправляем сообщение об ошибке

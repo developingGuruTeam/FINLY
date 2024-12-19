@@ -11,12 +11,6 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 	currency, _ := CurrencyFromChatID(update.Message.Chat.ID)
 
 	switch command {
-	case "💡 Напоминание":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
-		msg.ParseMode = "Markdown"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send main menu: %v", err)
-		}
 
 	case "сальдо":
 		saldo := buttonCreator.CreateSaldoAnalyticButtons()
@@ -45,6 +39,22 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
 		newMsg.ParseMode = "Markdown"
 		_, _ = bot.Send(newMsg)
+
+	// напоминания об оплате
+	case "💡 Напоминание":
+		notion := buttonCreator.CreateNotionButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите тип напоминания")
+		msg.ReplyMarkup = notion
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send main menu: %v", err)
+		}
+
+	case "📅 Регулярный платёж":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /info message: %v", err)
+		}
 	}
 }
 
