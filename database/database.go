@@ -40,4 +40,13 @@ func ConnectionDB() {
 	}
 
 	fmt.Println("Миграции успешно выполнены")
+
+	// ОЧИСТКА БД ТРАНЗАЦКЦИЙ ОТ ГОВНА)))
+
+	/*err = db.Exec("DELETE FROM transactions").Error
+	if err != nil {
+		log.Fatalf("Ошибка очистки данных в таблице транзакций: %v", err)
+	}
+	log.Println("Данные из таблицы транзакций успешно удалены!")
+	*/
 }

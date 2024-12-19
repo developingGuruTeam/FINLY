@@ -9,6 +9,10 @@ import (
 )
 
 // анализ по категориям за неделю
+// ВЗЯТЬ ВСЮ СУММУ ДОХОДОВ(РАСХОДОВ), ПРЕДСТАВИТЬ В ВИДЕ 100% и ПОСЧИТАТЬ процентовку каждой из категорий относительно тотала
+// вывести две диаграммы и легенду к ним где будут список категорий не нулевых с % и(или) общими суммами для наглядности пирога из графиков
+// надо полностью переделать это, а также добавить валюту
+// убрать топ категории, они имеются в сальдо, не зачем повторяться
 func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 
 	if database.DB == nil {
@@ -50,7 +54,7 @@ func AnalyseByCategoriesWeek(update tgbotapi.Update) (string, error) {
 		}
 	}
 	// Генерация итогового текста
-	report := fmt.Sprintf("%s Ваш анализ за неделю по категориям:\n\n", update.Message.Chat.LastName)
+	report := fmt.Sprintf("%s Аналитика доходов и расходов по категориям\n\n", update.Message.Chat.LastName)
 
 	// Расходы по категориям
 	if len(totalWeekExpenses) > 0 {
@@ -93,7 +97,7 @@ func AnalyseByCategoriesMonth(update tgbotapi.Update) (string, error) {
 		return "", fmt.Errorf("ошибка при анализе расходов за неделю: %v", err)
 	}
 
-	totalMonthIncomes, err := analyticIncomes.IncomeMonthAnalytic(update)
+	totalMonthIncomes, _, err := analyticIncomes.IncomeMonthAnalytic(update)
 	if err != nil {
 		return "", fmt.Errorf("ошибка при анализе доходов за неделю: %v", err)
 	}

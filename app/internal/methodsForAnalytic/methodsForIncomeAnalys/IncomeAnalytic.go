@@ -103,46 +103,70 @@ func GenerateWeeklyIncomeReport(categorySummary map[string]uint64) string {
 	return report
 }
 
-func (an *AnalyticHandler) IncomeMonthAnalytic(update tgbotapi.Update) (map[string]uint64, error) {
+func (a *AnalyticHandler) IncomeMonthAnalytic(update tgbotapi.Update) (map[string]uint64, uint64, error) {
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second) // Конец месяца
+	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
 
 	var results []struct {
-		Category   string
-		TotalValue uint64
+		Category string
+		Value    uint64
 	}
 
-	err := an.DB.Model(&models.Transactions{}).
-		Select("category, SUM (quantities) as total_value").
+	err := a.DB.Model(&models.Transactions{}).
+		Select("category, SUM(quantities) as value").
 		Where("telegram_id = ? AND operation_type = ? AND created_at BETWEEN ? AND ?",
-			update.Message.Chat.ID, true, startOfMonth, endOfMonth).
+			update.Message.Chat.ID, true, startOfMonth, endOfMonth). // Только доходы
 		Group("category").
 		Scan(&results).Error
+
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении данных за неделю: %w", err)
+		return nil, 0, fmt.Errorf("ошибка анализа доходов за месяц: %v", err)
 	}
 
 	categorySummary := make(map[string]uint64)
-	for _, result := range results {
-		categorySummary[result.Category] += result.TotalValue
+	totalIncome := uint64(0)
+
+	for _, item := range results {
+		categorySummary[item.Category] = item.Value
+		totalIncome += item.Value
 	}
-	return categorySummary, nil
+
+	return categorySummary, totalIncome, nil
 }
 
 func GenerateMonthlyIncomeReport(categorySummary map[string]uint64) string {
+	categoryDetails := map[string]string{
+		"Заработная плата":    "🔵",
+		"Побочный доход":      "🔴",
+		"Доход от бизнеса":    "🟡",
+		"Гос. выплаты":        "🟢",
+		"Продажа имущества":   "🟠",
+		"Доход от инвестиций": "🟣",
+		"Прочее":              "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедший месяц доходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за месяц:\n\n"
 	totalIncome := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Доход: %d\n", category, total)
-		totalIncome += total
+	for _, value := range categorySummary {
+		totalIncome += value
 	}
 
-	report += fmt.Sprintf("\n💵 Общий доход за месяц составил: %d", totalIncome)
+	report := "📊 Доходы за месяц:\n\n"
+
+	for category, value := range categorySummary {
+		percentage := (float64(value) / float64(totalIncome)) * 100
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, int(percentage))
+		}
+	}
+
+	report += fmt.Sprintf("\n💸 Общий доход: %d", totalIncome)
+
 	return report
 }

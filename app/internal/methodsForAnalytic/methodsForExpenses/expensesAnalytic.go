@@ -5,6 +5,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
+	"log"
 	"time"
 )
 
@@ -37,7 +38,7 @@ func (exp *ExpensesHandler) ExpenseDayAnalytic(update tgbotapi.Update) ([]models
 	return transactions, nil
 }
 
-func GenerateDailyExpenseReport(expenses []models.Transactions) string {
+func GenerateDailyExpenseReport(expenses []models.Transactions, currency string) string {
 	if len(expenses) == 0 {
 		return "📉 Сегодня у вас не было расходов."
 	}
@@ -54,7 +55,7 @@ func GenerateDailyExpenseReport(expenses []models.Transactions) string {
 		report += "\n"
 		totalExpenses += exp.Quantities
 	}
-	report += fmt.Sprintf("💸 Итого расходов за день: %d\n", totalExpenses)
+	report += fmt.Sprintf("💸 Итого расходов за день: %d %s\n", totalExpenses, currency)
 	return report
 }
 
@@ -86,7 +87,7 @@ func (exp *ExpensesHandler) ExpenseWeekAnalytic(update tgbotapi.Update) (map[str
 	return categorySummary, nil
 }
 
-func GenerateWeeklyExpensesReport(categorySummary map[string]uint64) string {
+func GenerateWeeklyExpensesReport(categorySummary map[string]uint64, currency string) string {
 	if len(categorySummary) == 0 {
 		return "📊 За прошедшую неделю расходы отсутствуют."
 	}
@@ -99,12 +100,13 @@ func GenerateWeeklyExpensesReport(categorySummary map[string]uint64) string {
 		totalExpense += total
 	}
 
-	report += fmt.Sprintf("\n💸 Общий расход за неделю составил: %d", totalExpense)
+	report += fmt.Sprintf("\n💸 Общий расход за неделю составил: %d %s", totalExpense, currency)
 	return report
 }
 
 // расход за месяц
 func (exp *ExpensesHandler) ExpenseMonthAnalytic(update tgbotapi.Update) (map[string]uint64, error) {
+
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second) // Конец месяца
@@ -115,11 +117,14 @@ func (exp *ExpensesHandler) ExpenseMonthAnalytic(update tgbotapi.Update) (map[st
 	}
 
 	err := exp.DB.Model(&models.Transactions{}).
-		Select("category, SUM (quantities) as value").
+		Select("category, SUM(quantities) as value").
 		Where("telegram_id = ? AND operation_type = ? AND created_at BETWEEN ? AND ?",
-			update.Message.Chat.ID, false, startOfMonth, endOfMonth).
+			update.Message.Chat.ID, false, startOfMonth, endOfMonth). // Только расходы
 		Group("category").
 		Scan(&results).Error
+
+	log.Printf("Результаты запроса за месяц: %+v", results) // Логирование
+
 	if err != nil {
 		return nil, fmt.Errorf("ошибка по расходам за месяц: %v", err)
 	}
@@ -131,19 +136,43 @@ func (exp *ExpensesHandler) ExpenseMonthAnalytic(update tgbotapi.Update) (map[st
 	return categorySummary, nil
 }
 
-func GenerateMonthlyExpensesReport(categorySummary map[string]uint64) string {
+func GenerateMonthlyExpensesReport(categorySummary map[string]uint64, currency string) string {
+	categoryDetails := map[string]string{
+		"Бытовые траты":       "🔵",
+		"Регулярные платежи":  "🔴",
+		"Одежда":              "🟡",
+		"Здоровье":            "🟢",
+		"Досуг и образование": "🟠",
+		"Инвестиции":          "🟣",
+		"Прочие расходы":      "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедший месяц расходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за месяц:\n\n"
-	totalIncome := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Расход: %d\n", category, total)
-		totalIncome += total
+	// общий расход
+	totalExpense := uint64(0)
+	for _, value := range categorySummary {
+		totalExpense += value
 	}
 
-	report += fmt.Sprintf("\n💸 Общий расход за месяц составил: %d", totalIncome)
+	report := "📊 Расходы за месяц:\n\n"
+
+	for category, value := range categorySummary {
+		// считаем проценты
+		percentage := (float64(value) / float64(totalExpense)) * 100
+
+		// Добавляем строку отчёта
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, int(percentage))
+		}
+	}
+
+	// финиш
+	report += fmt.Sprintf("\n💸 Общие расходы: %d %s", totalExpense, currency)
+
 	return report
 }

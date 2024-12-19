@@ -107,7 +107,7 @@ func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 	if err != nil {
 		return models.Summary{}, fmt.Errorf("ошибка в вычислении расходов")
 	}
-	totalIncomes, err := analyticIncomes.IncomeMonthAnalytic(update)
+	totalIncomes, _, err := analyticIncomes.IncomeMonthAnalytic(update)
 	if err != nil {
 		return models.Summary{}, fmt.Errorf("ошибка в вычислении доходов")
 	}

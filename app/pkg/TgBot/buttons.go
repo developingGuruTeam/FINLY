@@ -32,14 +32,14 @@ func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardM
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💳 Заработная плата"),
-			tgbotapi.NewKeyboardButton("💱 Дополнительный доход"),
+			tgbotapi.NewKeyboardButton("💱 Побочный доход"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("😎 Доход от бизнеса"),
 			tgbotapi.NewKeyboardButton("🏦 Доход от инвестиций"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("👮‍♂️ Гос. выплаты"),
+			tgbotapi.NewKeyboardButton("👮‍ Гос. выплаты"),
 			tgbotapi.NewKeyboardButton("🏠 Продажа имущества"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -52,7 +52,7 @@ func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardM
 func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🦑 Бытовые траты"),
+			tgbotapi.NewKeyboardButton("🛍 Бытовые траты"),
 			tgbotapi.NewKeyboardButton("🫡 Регулярные платежи"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -64,7 +64,7 @@ func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboar
 			tgbotapi.NewKeyboardButton("🚀 Инвестиции"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🥷 Прочее"),
+			tgbotapi.NewKeyboardButton("🔻 Прочие расходы"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -113,7 +113,7 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🛍 По категориям"),
+			tgbotapi.NewKeyboardButton("🛍 Анализ категорий"),
 			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -126,8 +126,8 @@ func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboa
 func (t TelegramButtonCreator) CreateCategoryAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("💅 неделя"),
-			tgbotapi.NewKeyboardButton("🤳 месяц"),
+			tgbotapi.NewKeyboardButton("💲 Анализ за неделю"),
+			tgbotapi.NewKeyboardButton("💰 Анализ за месяц"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
