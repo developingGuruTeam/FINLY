@@ -99,19 +99,37 @@ func (an *AnalyticHandler) IncomeWeekAnalytic(update tgbotapi.Update) (map[strin
 }
 
 func GenerateWeeklyIncomeReport(categorySummary map[string]uint64, currency string) string {
+	categoryDetails := map[string]string{
+		"Заработная плата":    "🔵",
+		"Побочный доход":      "🔴",
+		"Доход от бизнеса":    "🟡",
+		"Гос. выплаты":        "🟢",
+		"Продажа имущества":   "🟠",
+		"Доход от инвестиций": "🟣",
+		"Прочее":              "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедшую неделю доходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за неделю:\n\n"
 	totalIncome := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Доход: %d\n", category, total)
-		totalIncome += total
+	for _, value := range categorySummary {
+		totalIncome += value
 	}
 
-	report += fmt.Sprintf("\n💵 Общий доход за неделю составил: %d %s", totalIncome, currency)
+	report := "📊 *Доходы за неделю*\n\n"
+
+	for category, value := range categorySummary {
+		percentage := (float64(value) / float64(totalIncome)) * 100
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, int(percentage))
+		}
+	}
+
+	report += fmt.Sprintf("\n💸 Общий доход за неделю: *%d* %s", totalIncome, currency)
 	return report
 }
 
@@ -167,7 +185,7 @@ func GenerateMonthlyIncomeReport(categorySummary map[string]uint64, currency str
 		totalIncome += value
 	}
 
-	report := "📊 Доходы за месяц:\n\n"
+	report := "📊 *Доходы за месяц*\n\n"
 
 	for category, value := range categorySummary {
 		percentage := (float64(value) / float64(totalIncome)) * 100
@@ -178,7 +196,7 @@ func GenerateMonthlyIncomeReport(categorySummary map[string]uint64, currency str
 		}
 	}
 
-	report += fmt.Sprintf("\n💸 Общий доход: %d %s", totalIncome, currency)
+	report += fmt.Sprintf("\n💸 Общий доход за месяц: *%d* %s", totalIncome, currency)
 
 	return report
 }

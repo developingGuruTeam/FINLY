@@ -326,21 +326,40 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📈 Отчет за неделю":
-		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+		dbConn := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
 
-		// Получаем данные за день
-		transactions, err := analyticHandler.IncomeWeekAnalytic(update)
+		// Получаем данные за неделю
+		incomeSummary, err := dbConn.IncomeWeekAnalytic(update)
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
 			_, _ = bot.Send(msg)
-			log.Printf("Ошибка получения данных за день: %v", err)
+			log.Printf("Ошибка получения данных по доходам за неделю: %v", err)
 			return
 		}
 
-		// Формируем текст отчёта
-		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(transactions, currency)
-		msg := tgbotapi.NewMessage(chatID, report)
-		_, _ = bot.Send(msg)
+		// Генерируем текстовый отчет
+		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(incomeSummary, currency)
+
+		// Генерируем диаграмму
+		chartURL, err := methodsForIncomeAnalys.GenerateWeeklyIncomePieChartURL(incomeSummary)
+		if err != nil {
+			log.Printf("Ошибка генерации диаграммы: %v", err)
+			msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s\n(Диаграмму построить не удалось)", report))
+			_, _ = bot.Send(msg)
+			handled = true
+			return
+		}
+
+		// Отправляем диаграмму с подписью
+		imageMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(chartURL))
+		imageMsg.Caption = report       // Устанавливаем подпись из текста отчёта
+		imageMsg.ParseMode = "Markdown" // Форматирование текста в подписи
+		_, err = bot.Send(imageMsg)
+		if err != nil {
+			log.Printf("Ошибка отправки изображения с подписью: %v", err)
+			return
+		}
+
 		handled = true
 
 	case "📈 Отчет за месяц":
@@ -367,12 +386,15 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			return
 		}
 
-		// Отправляем диаграмму
+		// Отправляем диаграмму с подписью
 		imageMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(chartURL))
-		_, _ = bot.Send(imageMsg)
-		// Отправляем текстовый отчёт
-		textMsg := tgbotapi.NewMessage(chatID, report)
-		_, _ = bot.Send(textMsg)
+		imageMsg.Caption = report       // Устанавливаем подпись из текста отчёта
+		imageMsg.ParseMode = "Markdown" // Форматирование текста в подписи
+		_, err = bot.Send(imageMsg)
+		if err != nil {
+			log.Printf("Ошибка отправки изображения с подписью: %v", err)
+			return
+		}
 
 		handled = true
 
@@ -403,16 +425,36 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 	case "📉 Отчет за неделю":
 		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
-		expenses, err := dbConn.ExpenseWeekAnalytic(update)
+		expenses, err := dbConn.ExpenseWeekAnalytic(update) // Получаем данные за неделю
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
 			_, _ = bot.Send(msg)
 			log.Printf("Ошибка получения данных по расходам за неделю: %v", err)
 			return
 		}
-		report := methodsForExpenses.GenerateWeeklyExpensesReport(expenses, currency)
-		msg := tgbotapi.NewMessage(chatID, report)
-		_, _ = bot.Send(msg)
+
+		report := methodsForExpenses.GenerateWeeklyExpensesReport(expenses, currency) // отчет
+
+		// строим диаграмму
+		chartURL, err := methodsForExpenses.GenerateWeeklyExpensePieChartURL(expenses)
+		if err != nil {
+			log.Printf("Ошибка генерации диаграммы: %v", err)
+			msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s\n(Диаграмму построить не удалось)", report))
+			_, _ = bot.Send(msg)
+			handled = true
+			return
+		}
+
+		// Отправляем диаграмму с подписью
+		imageMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(chartURL))
+		imageMsg.Caption = report       // Устанавливаем подпись из текста отчёта
+		imageMsg.ParseMode = "Markdown" // Форматирование текста в подписи
+		_, err = bot.Send(imageMsg)
+		if err != nil {
+			log.Printf("Ошибка отправки изображения с подписью: %v", err)
+			return
+		}
+
 		handled = true
 
 	case "📉 Отчет за месяц":
@@ -426,7 +468,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		report := methodsForExpenses.GenerateMonthlyExpensesReport(expenses, currency)
 
-		// Генерируем диаграмму
+		// строим диаграмму
 		chartURL, err := methodsForExpenses.GenerateExpensePieChartURL(expenses)
 		if err != nil {
 			log.Printf("Ошибка генерации диаграммы: %v", err)
@@ -436,12 +478,15 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			return
 		}
 
-		// Отправляем изображение диаграммы
+		// Отправляем диаграмму с подписью
 		imageMsg := tgbotapi.NewPhoto(chatID, tgbotapi.FileURL(chartURL))
-		_, _ = bot.Send(imageMsg)
-		// Отправляем текстовый отчёт
-		msg := tgbotapi.NewMessage(chatID, report)
-		_, _ = bot.Send(msg)
+		imageMsg.Caption = report       // Устанавливаем подпись из текста отчёта
+		imageMsg.ParseMode = "Markdown" // Форматирование текста в подписи
+		_, err = bot.Send(imageMsg)
+		if err != nil {
+			log.Printf("Ошибка отправки изображения с подписью: %v", err)
+			return
+		}
 
 		handled = true
 

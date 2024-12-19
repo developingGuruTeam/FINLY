@@ -99,19 +99,37 @@ func (exp *ExpensesHandler) ExpenseWeekAnalytic(update tgbotapi.Update) (map[str
 }
 
 func GenerateWeeklyExpensesReport(categorySummary map[string]uint64, currency string) string {
+	categoryDetails := map[string]string{
+		"Бытовые траты":       "🔵",
+		"Регулярные платежи":  "🔴",
+		"Одежда":              "🟡",
+		"Здоровье":            "🟢",
+		"Досуг и образование": "🟠",
+		"Инвестиции":          "🟣",
+		"Прочие расходы":      "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедшую неделю расходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за неделю:\n\n"
 	totalExpense := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Расход: %d\n", category, total)
-		totalExpense += total
+	for _, value := range categorySummary {
+		totalExpense += value
 	}
 
-	report += fmt.Sprintf("\n💸 Общий расход за неделю составил: %d %s", totalExpense, currency)
+	report := "📊 *Расходы за неделю*\n\n"
+
+	for category, value := range categorySummary {
+		percentage := (float64(value) / float64(totalExpense)) * 100
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, int(percentage))
+		}
+	}
+
+	report += fmt.Sprintf("\n💸 Общий расход за неделю: *%d* %s", totalExpense, currency)
 	return report
 }
 
@@ -168,7 +186,7 @@ func GenerateMonthlyExpensesReport(categorySummary map[string]uint64, currency s
 		totalExpense += value
 	}
 
-	report := "📊 Расходы за месяц:\n\n"
+	report := "📊 *Расходы за месяц*\n\n"
 
 	for category, value := range categorySummary {
 		// считаем проценты
@@ -183,7 +201,7 @@ func GenerateMonthlyExpensesReport(categorySummary map[string]uint64, currency s
 	}
 
 	// финиш
-	report += fmt.Sprintf("\n💸 Общие расходы: %d %s", totalExpense, currency)
+	report += fmt.Sprintf("\n💸 Общие расходы за месяц: *%d* %s", totalExpense, currency)
 
 	return report
 }
