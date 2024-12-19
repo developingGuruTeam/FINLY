@@ -58,7 +58,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 	case "state_payments":
 		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Гос.выплаты"
+		category := "Гос. выплаты"
 		if err := transaction.PostIncome(update, category); err != nil {
 			log.Printf("Failed to save investment income: %v", err)
 		}
@@ -102,7 +102,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 	case "regular_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Побочный доход"
+		category := "Регулярные платежи"
 		if err := transaction.PostExpense(update, category); err != nil {
 			log.Printf("Failed to save regular expense: %v", err)
 		}
@@ -146,7 +146,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 	case "investment_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Расход на инвестиции"
+		category := "Инвестиции"
 		if err := transaction.PostExpense(update, category); err != nil {
 			log.Printf("Failed to save investment expense: %v", err)
 		}
@@ -157,7 +157,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 	case "other_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Прочие доходы"
+		category := "Прочие расходы"
 		if err := transaction.PostExpense(update, category); err != nil {
 			log.Printf("Failed to save other expense: %v", err)
 		}

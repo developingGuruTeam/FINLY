@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"strings"
 )
 
 //go:generate mockery --name=UsersHandlers --output=../tests/mocks --with-expecter
@@ -24,7 +25,7 @@ func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 	user := models.Users{
 		TelegramID: uint64(update.Message.Chat.ID),
 		Name:       update.Message.From.UserName,
-		Currency:   "RUB",
+		Currency:   "руб.",
 	}
 
 	var userExist models.Users
@@ -68,7 +69,14 @@ func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
 }
 
 func (u *UserMethod) UpdateUserCurrency(update tgbotapi.Update) error {
-	newCurrency := update.Message.Text
+	newCurrency := strings.ToLower(update.Message.Text)
+
+	// делаем тут валюту из трех букв и точку на конце
+	runes := []rune(newCurrency)
+	if len(runes) > 3 {
+		runes = runes[:3]
+	}
+	newCurrency = fmt.Sprintf("%s.", string(runes))
 
 	res := database.DB.Model(&models.Users{}).
 		Where("telegram_id = ?", uint64(update.Message.Chat.ID)).

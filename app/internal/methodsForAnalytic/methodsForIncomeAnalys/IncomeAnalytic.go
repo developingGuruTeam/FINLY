@@ -37,25 +37,37 @@ func (an *AnalyticHandler) IncomeDayAnalytic(update tgbotapi.Update) ([]models.T
 	return transactions, nil
 }
 
-func GenerateDailyIncomeReport(transactions []models.Transactions) string {
+func GenerateDailyIncomeReport(transactions []models.Transactions, currency string) string {
 	if len(transactions) == 0 {
-		return "📈 Сегодня у вас не было доходов."
+		return "📈 За сегодня доходов нет"
 	}
 
-	report := "📈 Отчёт за день:\n\n"
+	report := "📈 *Отчёт за день (доходы)*\n\n"
 	totalIncome := uint64(0)
 
-	for _, t := range transactions {
-		report += fmt.Sprintf("▪ Категория: %s\n", t.Category)
-		report += fmt.Sprintf("   Сумма: %d\n", t.Quantities)
-		if t.Description != "" {
-			report += fmt.Sprintf("   Комментарий: %s\n", t.Description)
+	for _, inc := range transactions {
+		// +3 часа к времени чтобы было по мск делаю временно. НАДО В БД ПОСТАВИТЬ НАШЕ ВРЕМЯ по умолчанию!!! либо как-то к юсеру привязаться
+		localTime := inc.CreatedAt.Add(3 * time.Hour)
+		formattedTime := localTime.Format("15:04")
+
+		report += fmt.Sprintf("▪ *%s*\n", inc.Category)
+		report += fmt.Sprintf("%d %s 📝 _%v_", inc.Quantities, currency, formattedTime)
+
+		// сокращаем коммент пользователя на вывод
+		if inc.Description != "" {
+			decs := inc.Description
+			runes := []rune(decs)
+			if len([]rune(decs)) > 32 {
+				decs = string(runes[:32])
+			}
+
+			report += fmt.Sprintf(" _%s_", decs)
 		}
 		report += "\n"
-		totalIncome += t.Quantities
+		totalIncome += inc.Quantities
 	}
 
-	report += fmt.Sprintf("💵 Итого доходов за день: %d\n", totalIncome)
+	report += fmt.Sprintf("\n💸 Итого расходов за день:\n*%d* %s\n", totalIncome, currency)
 	return report
 }
 
@@ -86,63 +98,105 @@ func (an *AnalyticHandler) IncomeWeekAnalytic(update tgbotapi.Update) (map[strin
 	return categorySummary, nil
 }
 
-func GenerateWeeklyIncomeReport(categorySummary map[string]uint64) string {
+func GenerateWeeklyIncomeReport(categorySummary map[string]uint64, currency string) string {
+	categoryDetails := map[string]string{
+		"Заработная плата":    "🔵",
+		"Побочный доход":      "🔴",
+		"Доход от бизнеса":    "🟡",
+		"Гос. выплаты":        "🟢",
+		"Продажа имущества":   "🟠",
+		"Доход от инвестиций": "🟣",
+		"Прочие доходы":       "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедшую неделю доходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за неделю:\n\n"
 	totalIncome := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Доход: %d\n", category, total)
-		totalIncome += total
+	for _, value := range categorySummary {
+		totalIncome += value
 	}
 
-	report += fmt.Sprintf("\n💵 Общий доход за неделю составил: %d", totalIncome)
+	report := "📊 *Доходы за неделю*\n\n"
+
+	for category, value := range categorySummary {
+		percentage := (float64(value) / float64(totalIncome)) * 100
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, int(percentage))
+		}
+	}
+
+	report += fmt.Sprintf("\n💸 Общий доход за неделю: *%d* %s", totalIncome, currency)
 	return report
 }
 
-func (an *AnalyticHandler) IncomeMonthAnalytic(update tgbotapi.Update) (map[string]uint64, error) {
+func (a *AnalyticHandler) IncomeMonthAnalytic(update tgbotapi.Update) (map[string]uint64, uint64, error) {
 	now := time.Now()
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second) // Конец месяца
+	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
 
 	var results []struct {
-		Category   string
-		TotalValue uint64
+		Category string
+		Value    uint64
 	}
 
-	err := an.DB.Model(&models.Transactions{}).
-		Select("category, SUM (quantities) as total_value").
+	err := a.DB.Model(&models.Transactions{}).
+		Select("category, SUM(quantities) as value").
 		Where("telegram_id = ? AND operation_type = ? AND created_at BETWEEN ? AND ?",
-			update.Message.Chat.ID, true, startOfMonth, endOfMonth).
+			update.Message.Chat.ID, true, startOfMonth, endOfMonth). // Только доходы
 		Group("category").
 		Scan(&results).Error
+
 	if err != nil {
-		return nil, fmt.Errorf("ошибка при получении данных за неделю: %w", err)
+		return nil, 0, fmt.Errorf("ошибка анализа доходов за месяц: %v", err)
 	}
 
 	categorySummary := make(map[string]uint64)
-	for _, result := range results {
-		categorySummary[result.Category] += result.TotalValue
+	totalIncome := uint64(0)
+
+	for _, item := range results {
+		categorySummary[item.Category] = item.Value
+		totalIncome += item.Value
 	}
-	return categorySummary, nil
+
+	return categorySummary, totalIncome, nil
 }
 
-func GenerateMonthlyIncomeReport(categorySummary map[string]uint64) string {
+func GenerateMonthlyIncomeReport(categorySummary map[string]uint64, currency string) string {
+	categoryDetails := map[string]string{
+		"Заработная плата":    "🔵",
+		"Побочный доход":      "🔴",
+		"Доход от бизнеса":    "🟡",
+		"Гос. выплаты":        "🟢",
+		"Продажа имущества":   "🟠",
+		"Доход от инвестиций": "🟣",
+		"Прочие доходы":       "⚪️",
+	}
+
 	if len(categorySummary) == 0 {
 		return "📊 За прошедший месяц доходы отсутствуют."
 	}
 
-	report := "📊 Отчёт за месяц:\n\n"
 	totalIncome := uint64(0)
-
-	for category, total := range categorySummary {
-		report += fmt.Sprintf("▪ Категория: %s — Доход: %d\n", category, total)
-		totalIncome += total
+	for _, value := range categorySummary {
+		totalIncome += value
 	}
 
-	report += fmt.Sprintf("\n💵 Общий доход за месяц составил: %d", totalIncome)
+	report := "📊 *Доходы за месяц*\n\n"
+
+	for category, value := range categorySummary {
+		percentage := (float64(value) / float64(totalIncome)) * 100
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, int(percentage))
+		} else {
+			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, int(percentage))
+		}
+	}
+
+	report += fmt.Sprintf("\n💸 Общий доход за месяц: *%d* %s", totalIncome, currency)
+
 	return report
 }

@@ -12,10 +12,6 @@ import (
 
 // Отправляем уведомление пользователю
 func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string) {
-	//// Формируем сообщение для отправки вместе с именем, т.к. оно может быть пустым, обращаемся по айди.
-	//if userName == "" {
-	//	userName = strconv.Itoa(int(chatID))
-	//}
 	clearName, _ := ClearUserNameFromChatID(chatID)
 	if clearName == "" {
 		clearName = userName
@@ -54,5 +50,4 @@ func ClearUserNameFromChatID(chatID int64) (string, error) {
 	}
 	fmt.Println(user.Name)
 	return user.Name, nil
-
 }
