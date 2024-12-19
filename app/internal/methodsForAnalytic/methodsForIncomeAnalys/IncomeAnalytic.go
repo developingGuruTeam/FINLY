@@ -106,7 +106,7 @@ func GenerateWeeklyIncomeReport(categorySummary map[string]uint64, currency stri
 		"Гос. выплаты":        "🟢",
 		"Продажа имущества":   "🟠",
 		"Доход от инвестиций": "🟣",
-		"Прочее":              "⚪️",
+		"Прочие доходы":       "⚪️",
 	}
 
 	if len(categorySummary) == 0 {

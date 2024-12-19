@@ -505,13 +505,13 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
 		handled = true
 
-	case "💲 Анализ за неделю":
-		command := "💲 Анализ за неделю"
+	case "💲Анализ за неделю":
+		command := "💲Анализ за неделю"
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
 		handled = true
 
-	case "💰 Анализ месяц":
-		command := "💰 Анализ за месяц"
+	case "💰Анализ за месяц":
+		command := "💰Анализ за месяц"
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
 		handled = true
 

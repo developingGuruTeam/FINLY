@@ -67,9 +67,9 @@ func GenerateWeeklySaldoReport(sum models.Summary, currency string) string {
 
 	// Итоговая прибыль или убыток
 	if sum.Profit >= 0 {
-		report += fmt.Sprintf("\n🟢 Баланс положительный\n%d %s\n", sum.Profit, currency)
+		report += fmt.Sprintf("\n🟢 Баланс положительный *%d* %s\n", sum.Profit, currency)
 	} else {
-		report += fmt.Sprintf("\n🔴 Баланс отрицательный\n%d %s\n", -sum.Profit, currency)
+		report += fmt.Sprintf("\n🔴 Баланс отрицательный *%d* %s\n", -sum.Profit, currency)
 	}
 
 	// топ расход
@@ -138,9 +138,9 @@ func GenerateMonthlySaldoReport(sum models.Summary, currency string) string {
 	report := "📊 *Сальдо за месяц*\n"
 
 	if sum.Profit >= 0 {
-		report += fmt.Sprintf("\n🟢 Баланс положительный\n%d %s\n ", sum.Profit, currency)
+		report += fmt.Sprintf("\n🟢 Баланс положительный *%d* %s\n ", sum.Profit, currency)
 	} else {
-		report += fmt.Sprintf("\n🔴 Баланс отрицательный\n%d %s\n", -sum.Profit, currency)
+		report += fmt.Sprintf("\n🔴 Баланс отрицательный *%d* %s\n", -sum.Profit, currency)
 	}
 
 	// топ расход
