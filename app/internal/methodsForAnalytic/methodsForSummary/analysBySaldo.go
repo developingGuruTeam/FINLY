@@ -18,6 +18,7 @@ var (
 func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
 	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
+	var summary models.Summary
 
 	if database.DB == nil {
 		return models.Summary{}, fmt.Errorf("база данных не инициализирована в сальдо за неделю")
@@ -32,7 +33,7 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 	if err != nil {
 		return models.Summary{}, fmt.Errorf("ошибка при анализе доходов за неделю: %v", err)
 	}
-
+	fmt.Println(summary.TotalIncome)
 	// подсчет общих доходов
 	for category, amount := range totalWeekIncomes {
 		summary.TotalIncome += amount
@@ -45,7 +46,7 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 			}
 		}
 	}
-
+	fmt.Print(summary.TotalIncome)
 	for category, amount := range totalWeekExpenses {
 		summary.TotalExpense += amount
 		summary.ExpenseCategories = append(summary.ExpenseCategories, models.CategorySummary{Category: category, Amount: amount})
@@ -98,7 +99,7 @@ func GenerateWeeklySaldoReport(sum models.Summary, currency string) string {
 func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
 	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
-
+	var summary models.Summary
 	if database.DB == nil {
 		return models.Summary{}, fmt.Errorf("ошибка подключения к БД в аналитике сальдо")
 	}

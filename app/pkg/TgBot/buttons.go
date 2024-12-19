@@ -113,21 +113,8 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🛍 Анализ категорий"),
-			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
-		),
-		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
-			tgbotapi.NewKeyboardButton("⬅ В меню"),
-		),
-	)
-}
-
-func (t TelegramButtonCreator) CreateCategoryAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
-	return tgbotapi.NewReplyKeyboard(
-		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("💲Анализ за неделю"),
-			tgbotapi.NewKeyboardButton("💰Анализ за месяц"),
+			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
@@ -156,6 +143,9 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💱 Изменить валюту"),
+			tgbotapi.NewKeyboardButton("💡 Создать напоминание"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
