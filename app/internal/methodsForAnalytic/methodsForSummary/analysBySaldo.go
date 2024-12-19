@@ -63,7 +63,7 @@ func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
 }
 
 func GenerateWeeklySaldoReport(sum models.Summary, currency string) string {
-	report := "📊 Сальдо за неделю\n"
+	report := "📊 *Сальдо за неделю*\n"
 
 	// Итоговая прибыль или убыток
 	if sum.Profit >= 0 {
@@ -135,7 +135,7 @@ func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
 }
 
 func GenerateMonthlySaldoReport(sum models.Summary, currency string) string {
-	report := "📊 Сальдо за месяц\n"
+	report := "📊 *Сальдо за месяц*\n"
 
 	if sum.Profit >= 0 {
 		report += fmt.Sprintf("\n🟢 Баланс положительный\n%d %s\n ", sum.Profit, currency)
