@@ -113,10 +113,11 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
+			tgbotapi.NewKeyboardButton("🧮 Статистика"),
 			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)

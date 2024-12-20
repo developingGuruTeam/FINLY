@@ -17,9 +17,10 @@ type Transactions struct {
 
 // структура пользователя
 type Users struct {
-	TelegramID uint64 `gorm:"primary_key" json:"telegram_id"`
-	Name       string `gorm:"not null" json:"name"`
-	Currency   string `gorm:"not null" json:"currency"`
+	TelegramID uint64    `gorm:"primary_key" json:"telegram_id"`
+	Name       string    `gorm:"not null" json:"name"`
+	Currency   string    `gorm:"not null" json:"currency"`
+	CreatedAt  time.Time `gorm:"autoCreateTime" json:"created_at"`
 }
 
 // структура категории

@@ -3,6 +3,7 @@ package TgBot
 import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
+	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
 	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"fmt"
@@ -513,6 +514,18 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	case "💰Анализ за месяц":
 		command := "💰Анализ за месяц"
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "🧮 Статистика":
+		dbConn := database.DB
+		userID := update.Message.From.ID
+		report := methodsForSummary.GenerateStatisticsReport(userID, dbConn)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, report)
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Ошибка отправки сообщения: %v", err)
+		}
+
 		handled = true
 
 	case "🤑 Cальдо":
