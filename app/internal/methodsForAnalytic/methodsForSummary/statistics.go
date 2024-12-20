@@ -7,20 +7,11 @@ import (
 )
 
 func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
-	report := "🧮 *Статистика*\n"
+	report := "🧮 *Статистика*\n\n"
 
 	/*
-		1. Имя +
-		2. Дата регистрации +
-		3. Текущая валюта +
-		4. Валовый оборот все приходы все расходы и баланс на сейчас за все время
-		5. Максимальный доход
-		6. Максимальный расход
-		7. Самый прибыльный месяц
-		8. Самый затратный месяц
-		9. Основная категория доходов
-		10. Любимые расходы
-
+		7. Самый прибыльный месяц -
+		8. Самый затратный месяц -
 	*/
 
 	// создание юзера
@@ -36,9 +27,70 @@ func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
 	// валюта
 	currency := user.Currency
 
-	report += fmt.Sprintf("👤 Имя: *%s*\n", name)
-	report += fmt.Sprintf("📅 Дата регистрации: *%s*\n", registrationDate)
-	report += fmt.Sprintf("💱 Текущая валюта: *%s*\n", currency)
+	// Оборот
+	var allIncomes, allExpenses int64
+	db.Model(&models.Transactions{}).
+		Where("telegram_id = ? AND operation_type = ?", userID, true).
+		Select("SUM(quantities)").
+		Scan(&allIncomes)
+	db.Model(&models.Transactions{}).
+		Where("telegram_id = ? AND operation_type = ?", userID, false).
+		Select("SUM(quantities)").
+		Scan(&allExpenses)
+	allBalance := allIncomes - allExpenses
+
+	// макс доход
+	var maxIncome uint64
+	db.Table("transactions").
+		Select("MAX(quantities)").Where("telegram_id = ? AND operation_type = ?", userID, true).
+		Scan(&maxIncome)
+
+	// макс расход
+	var maxExpense uint64
+	db.Table("transactions").
+		Select("MAX(quantities)").Where("telegram_id = ? AND operation_type = ?", userID, false).
+		Scan(&maxExpense)
+
+	// топ категория доходов
+	var categoryInc string
+	var totalInc uint64
+	db.Table("transactions").
+		Select("category, SUM(quantities) as Total").
+		Where("telegram_id = ? AND operation_type = ?", userID, true).
+		Group("category").
+		Order("Total DESC").
+		Limit(1).
+		Row().Scan(&categoryInc, &totalInc)
+
+	// топ категория доходов
+	var categoryExp string
+	var totalExp uint64
+	db.Table("transactions").
+		Select("category, SUM(quantities) as Total").
+		Where("telegram_id = ? AND operation_type = ?", userID, false).
+		Group("category").
+		Order("Total DESC").
+		Limit(1).
+		Row().Scan(&categoryExp, &totalExp)
+
+	// кол-во операций всего
+	var incCount, expCount int64
+	db.Model(&models.Transactions{}).
+		Where("telegram_id = ? AND operation_type = ?", userID, true).
+		Count(&incCount)
+	db.Model(&models.Transactions{}).
+		Where("telegram_id = ? AND operation_type = ?", userID, false).
+		Count(&expCount)
+
+	report += fmt.Sprintf("👤 Имя: *%s*\n\n", name)
+	report += fmt.Sprintf("📅 Дата регистрации: *%s*\n\n", registrationDate)
+	report += fmt.Sprintf("💱 Текущая валюта: *%s*\n\n", currency)
+	report += fmt.Sprintf("Баланс за все время %d %s\n\n", allBalance, currency)
+	report += fmt.Sprintf("Максимальный доход %d %s\n\n", maxIncome, currency)
+	report += fmt.Sprintf("Максимальный расход %d %s\n\n", maxExpense, currency)
+	report += fmt.Sprintf("Топ доход *%s %d* %s\n\n", categoryInc, totalInc, currency)
+	report += fmt.Sprintf("Топ расход *%s %d* %s\n\n", categoryExp, totalExp, currency)
+	report += fmt.Sprintln("Всего операций: %v \n(Доходы: %v , Расходы: %v)", expCount+incCount, incCount, expCount)
 
 	return report
 }
