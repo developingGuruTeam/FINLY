@@ -9,12 +9,6 @@ import (
 func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
 	report := "🧮 *Статистика*\n\n"
 
-	/*
-		7. Самый прибыльный месяц -
-		8. Самый затратный месяц -
-	*/
-
-	// создание юзера
 	var user models.Users
 	db.First(&user, "telegram_id = ?", userID)
 
@@ -27,7 +21,7 @@ func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
 	// валюта
 	currency := user.Currency
 
-	// Оборот
+	// оборот
 	var allIncomes, allExpenses int64
 	db.Model(&models.Transactions{}).
 		Where("telegram_id = ? AND operation_type = ?", userID, true).
@@ -73,7 +67,7 @@ func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
 		Limit(1).
 		Row().Scan(&categoryExp, &totalExp)
 
-	// кол-во операций всего
+	// кол-во операций всего в штуках
 	var incCount, expCount int64
 	db.Model(&models.Transactions{}).
 		Where("telegram_id = ? AND operation_type = ?", userID, true).
@@ -85,12 +79,12 @@ func GenerateStatisticsReport(userID int64, db *gorm.DB) string {
 	report += fmt.Sprintf("👤 Имя: *%s*\n\n", name)
 	report += fmt.Sprintf("📅 Дата регистрации: *%s*\n\n", registrationDate)
 	report += fmt.Sprintf("💱 Текущая валюта: *%s*\n\n", currency)
-	report += fmt.Sprintf("Баланс за все время %d %s\n\n", allBalance, currency)
-	report += fmt.Sprintf("Максимальный доход %d %s\n\n", maxIncome, currency)
-	report += fmt.Sprintf("Максимальный расход %d %s\n\n", maxExpense, currency)
-	report += fmt.Sprintf("Топ доход *%s %d* %s\n\n", categoryInc, totalInc, currency)
-	report += fmt.Sprintf("Топ расход *%s %d* %s\n\n", categoryExp, totalExp, currency)
-	report += fmt.Sprintln("Всего операций: %v \n(Доходы: %v , Расходы: %v)", expCount+incCount, incCount, expCount)
+	report += fmt.Sprintf("⚖️ Баланс за все время *%d* %s\n\n", allBalance, currency)
+	report += fmt.Sprintf("🟢️ Максимальный доход: *%d* %s\n\n", maxIncome, currency)
+	report += fmt.Sprintf("🔴 Максимальный расход: *%d* %s\n\n", maxExpense, currency)
+	report += fmt.Sprintf("📥 Основной доходы в категории: *%s %d* %s\n\n", categoryInc, totalInc, currency)
+	report += fmt.Sprintf("📤 Основые расходы в категории: *%s %d* %s\n\n", categoryExp, totalExp, currency)
+	report += fmt.Sprintf("🗃 Всего операций: *%v* шт. \n(Доходы: *%v* шт. Расходы: *%v* шт.)", expCount+incCount, incCount, expCount)
 
 	return report
 }
