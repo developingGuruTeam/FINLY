@@ -93,3 +93,7 @@ time="2025-01-04T21:00:23+03:00" level=info msg="Successfully connected to Teleg
 time="2025-01-04T21:15:02+03:00" level=info msg="Successfully connected to Telegram bot API!"
 time="2025-01-04T21:15:44+03:00" level=info msg="Successfully connected to Telegram bot API!"
 time="2025-01-04T21:16:23+03:00" level=info msg="Successfully connected to Telegram bot API!"
+time="2025-01-04T21:20:08+03:00" level=info msg="Successfully connected to Telegram bot API!"
+time="2025-01-04T21:20:54+03:00" level=info msg="Successfully connected to Telegram bot API!"
+time="2025-01-04T21:28:23+03:00" level=fatal msg="Failed to connect to Telegram bot API: Post \"https://api.telegram.org/bot7666278448:AAFBLj-9v1LNl3MrjFnl8B1unnDR0xd5Xoc/getMe\": dial tcp: lookup api.telegram.org: i/o timeout"
+time="2025-01-04T21:28:48+03:00" level=info msg="Successfully connected to Telegram bot API!"

@@ -86,14 +86,18 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 		reminder.NextReminder = date
 
-		// Завершаем процесс
+		menuMain := ButtonsCreate.TelegramButtonCreator{}
+		back := menuMain.CreateMainMenuButtons()
 		msg := tgbotapi.NewMessage(chatID, "Напоминание успешно создано!")
-		_, _ = bot.Send(msg)
 
-		fmt.Printf("Reminder saved: %+v", reminder)
+		fmt.Println(reminder)
 
-		// Удаляем состояние
-		delete(RemindersStates, chatID)
-
+		msg.ReplyMarkup = back
+		if _, err := bot.Send(msg); err != nil {
+			log.Errorf("Failed to send main menu: %v", err)
+		}
+		// Удаляем напоминание из состояния
+		delete(RemindersStates, update.Message.Chat.ID)
+		return
 	}
 }
