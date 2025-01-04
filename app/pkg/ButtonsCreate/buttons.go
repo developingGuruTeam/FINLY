@@ -1,4 +1,4 @@
-package TgBot
+package ButtonsCreate
 
 import (
 	"math/rand"
@@ -182,6 +182,18 @@ func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarku
 	)
 }
 
+func (t TelegramButtonCreator) CreateFreqButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("🫠 Через неделю"),
+			tgbotapi.NewKeyboardButton("🌙 Через месяц"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
 //// создание inline кнопок
 //func (t TelegramButtonCreator) CreateInlineButtons() tgbotapi.InlineKeyboardMarkup {
 //	return tgbotapi.NewInlineKeyboardMarkup(
@@ -194,7 +206,7 @@ func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarku
 //}
 
 // рандомное сообщение для команды /hi
-func randomTextForHi() string {
+func RandomTextForHi() string {
 	hiText := [...]string{
 		"💰 Сегодня отличный день, чтобы начать экономить!", "💰 Ну что, приступим считать твои траты?",
 		"💰 Интересно, сегодня день будет ➕ или ➖ ?", "💰 Экономика должна быть экономной!",
