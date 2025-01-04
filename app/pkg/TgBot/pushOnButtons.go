@@ -3,11 +3,13 @@ package TgBot
 import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
+	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
 	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"sync"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type TransactionResponse struct {
@@ -57,7 +59,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	handled := false
 	switch update.Message.Text {
 
-	// ОПИСАНИЕ КНОПОК МЕНЮ
+	// ОПИСАНИЕ КНОПОК ГЛАВНОГО МЕНЮ
 	case "📥 Приход":
 		incomeMenu := buttonCreator.CreateIncomeMenuButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⚙ Выберите категорию")
@@ -76,12 +78,30 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
+	case "🕹 Управление":
+		manageMenu := buttonCreator.CreateManageMenuButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⚙ Выберите категорию")
+		msg.ReplyMarkup = manageMenu
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send message for expense: %v", err)
+		}
+		handled = true
+
 	case "📊 Отчеты":
 		reportMenu := buttonCreator.CreateReportsMenuButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📊 Выберите тип отчета")
 		msg.ReplyMarkup = reportMenu
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send message for reports: %v", err)
+		}
+		handled = true
+
+	case "ℹ️ Информация":
+		// НАПИСАТЬ ДОКУМЕНТАЦИЮ И ПРАВИЛО ПОВЕДЕНИЯ, ВОЗМОЖНО ЧЕРЕЗ teletype\telegraf, можно и в самом тг, сообщение в маркдауне
+		// как вариант разбить на меню и запилить "об авторах", но это если совсем будет крутое приложение
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📍 Бот предназначен для:\n ▪ Ведения учета доходов и расходов\n ▪ Создания отчетов по различным критериям\n ▪ Экономического анализа\n ▪ Контроля и управления финансами")
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /info message: %v", err)
 		}
 		handled = true
 
@@ -104,12 +124,6 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	// ОПИСАНИЕ ИНЛАЙН КОММАНД
-	case "/info":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📍 Бот предназначен для:\n ▪ Ведения учета доходов и расходов\n ▪ Создания отчетов по различным критериям\n ▪ Экономического анализа")
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send /info message: %v", err)
-		}
-		handled = true
 	// дописать нормальный хэлп!!!!!!
 	case "/help":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📌 Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
@@ -147,6 +161,14 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💫 Тарифный план":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Failed to send /info message: %v", err)
+		}
+		handled = true
+
+	case "🗓 Подписки":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
@@ -513,6 +535,18 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	case "💰Анализ за месяц":
 		command := "💰Анализ за месяц"
 		PushOnAnalyticButton(bot, update, buttonCreator, command)
+		handled = true
+
+	case "🧮 Статистика":
+		dbConn := database.DB
+		userID := update.Message.From.ID
+		report := methodsForSummary.GenerateStatisticsReport(userID, dbConn)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, report)
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Printf("Ошибка отправки сообщения: %v", err)
+		}
+
 		handled = true
 
 	case "🤑 Cальдо":

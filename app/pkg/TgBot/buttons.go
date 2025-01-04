@@ -1,8 +1,9 @@
 package TgBot
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"math/rand"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // интерфейс создания кнопок
@@ -23,6 +24,10 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("📊 Отчеты"),
+			tgbotapi.NewKeyboardButton("🕹 Управление"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("ℹ️ Информация"),
 			tgbotapi.NewKeyboardButton("⚙️ Настройки"),
 		),
 	)
@@ -113,10 +118,11 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
+			tgbotapi.NewKeyboardButton("🧮 Статистика"),
 			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -143,9 +149,20 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💱 Изменить валюту"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
+// cоздание кнопок меню настроек по строкам
+func (t TelegramButtonCreator) CreateManageMenuButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💡 Создать напоминание"),
+			tgbotapi.NewKeyboardButton("🗓 Подписки"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(""),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)

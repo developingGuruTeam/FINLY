@@ -67,7 +67,7 @@ func GenerateDailyIncomeReport(transactions []models.Transactions, currency stri
 		totalIncome += inc.Quantities
 	}
 
-	report += fmt.Sprintf("\n💸 Итого расходов за день:\n*%d* %s\n", totalIncome, currency)
+	report += fmt.Sprintf("\n💸 Итого доходов за день:\n*%d* %s\n", totalIncome, currency)
 	return report
 }
 

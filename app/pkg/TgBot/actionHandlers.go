@@ -69,7 +69,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 	case "property_sales":
 		transaction := methodsForTransaction.TransactionsMethod{}
-		category := "Доход от продажи имущества"
+		category := "Продажа имущества"
 		if err := transaction.PostIncome(update, category); err != nil {
 			log.Printf("Failed to save investment income: %v", err)
 		}
