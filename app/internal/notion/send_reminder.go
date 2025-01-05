@@ -7,18 +7,22 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/robfig/cron/v3"
+	"log/slog"
 	"time"
 )
 
-func StartReminderServiceWithCron(bot *tgbotapi.BotAPI) {
+func StartReminderServiceWithCron(bot *tgbotapi.BotAPI, log *slog.Logger) {
 	c := cron.New()
 
 	// TODO изменить на 12:00
 	// "0 9 * * *" означает "каждый день в 9:00"
 	c.AddFunc("*/1 * * * *", func() {
-		err := processReminders(bot)
+		err := processReminders(bot, log)
 		if err != nil {
-			fmt.Printf("Error while processing reminders: %v\n", err)
+			log.Error(
+				"Error while processing reminders: %v\n",
+				log.With("error", err),
+			)
 		}
 	})
 
@@ -26,7 +30,7 @@ func StartReminderServiceWithCron(bot *tgbotapi.BotAPI) {
 	c.Start()
 }
 
-func processReminders(bot *tgbotapi.BotAPI) error {
+func processReminders(bot *tgbotapi.BotAPI, log *slog.Logger) error {
 	now := time.Now()
 
 	var reminders []models.Reminder
@@ -35,7 +39,7 @@ func processReminders(bot *tgbotapi.BotAPI) error {
 	}
 
 	for _, reminder := range reminders {
-		sendReminder(bot, reminder)
+		sendReminder(bot, reminder, log)
 
 		if reminder.Frequency == "неделя" {
 			reminder.NextReminder = reminder.NextReminder.AddDate(0, 0, 7)
@@ -47,13 +51,13 @@ func processReminders(bot *tgbotapi.BotAPI) error {
 		}
 
 		if err := database.DB.Save(&reminder).Error; err != nil {
-			log.Errorf("Error updating reminder: %v\n", err)
+			log.Error("Error updating reminder:", log.With("error", err))
 		}
 	}
 	return nil
 }
 
-func sendReminder(bot *tgbotapi.BotAPI, reminder models.Reminder) {
+func sendReminder(bot *tgbotapi.BotAPI, reminder models.Reminder, log *slog.Logger) {
 	chatID := int64(reminder.UserID)
 
 	text := fmt.Sprintf(
@@ -65,6 +69,10 @@ func sendReminder(bot *tgbotapi.BotAPI, reminder models.Reminder) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	_, err := bot.Send(msg)
 	if err != nil {
-		log.Printf("Failed to send reminder to user %d: %v\n", chatID, err)
+		log.Error(
+			"Failed to send reminder to user %d:",
+			log.With("user_id", chatID),
+			log.With("error", err),
+		)
 	}
 }

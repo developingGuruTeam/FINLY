@@ -7,9 +7,10 @@ import (
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log/slog"
 )
 
-func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, command string) {
+func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, command string, log *slog.Logger) {
 	currency, _ := CurrencyFromChatID(update.Message.Chat.ID)
 
 	switch command {
@@ -19,13 +20,13 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период")
 		msg.ReplyMarkup = saldo
 		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send main menu: %v", err)
+			log.Info("Failed to send main menu: %v", log.With("error", err))
 		}
 
 	case "💲Сальдо за неделю":
 		summary, err := methodsForSummary.AnalyseBySaldoWeek(update)
 		if err != nil {
-			log.Printf("Failed to get summary in the week period: %v", err)
+			log.Info("Failed to get summary in the week period: %v", log.With("error", err))
 		}
 		response := methodsForSummary.GenerateWeeklySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
@@ -35,7 +36,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 	case "💰Сальдо за месяц":
 		summary, err := methodsForSummary.AnalyseBySaldoMonth(update)
 		if err != nil {
-			log.Printf("Failed to get summary in the month period: %v", err)
+			log.Info("Failed to get summary in the month period: %v", log.With("error", err))
 		}
 		response := methodsForSummary.GenerateMonthlySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
@@ -48,7 +49,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите тип напоминания")
 		msg.ReplyMarkup = notion
 		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send main menu: %v", err)
+			log.Info("Failed to send main menu: %v", log.With("error", err))
 		}
 
 	case "📅 Регулярный платёж":
@@ -59,7 +60,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		msg.ReplyMarkup = reminder
 		_, err := bot.Send(msg)
 		if err != nil {
-			log.Errorf("Error sending message: %v", err)
+			log.Error("Error sending message: %v", err)
 		}
 	}
 }
