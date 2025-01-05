@@ -4,11 +4,12 @@ import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/database"
 	"errors"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log/slog"
 	"strconv"
 	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, category string, log *slog.Logger) error {

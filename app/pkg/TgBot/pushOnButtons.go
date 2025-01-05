@@ -125,16 +125,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	// ОПИСАНИЕ ИНЛАЙН КОММАНД
-	// дописать нормальный хэлп!!!!!!
-	case "/help":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📌 Команды бота:\n/info - Информация о боте\n/help - Помощь по использованию бота")
-		if _, err := bot.Send(msg); err != nil {
-			log.Info("Failed to send /help message: ", log.With("error", err))
-		}
-		handled = true
-
 	case "/hi":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi()) // дописать нормальный хэлп
+		// оставил одну инлайн команду, просто в прикол пообщаться пользователю
+		// получить слова поддержки, ну и вообще что у нас есть такой функционал
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi())
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -162,7 +156,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💫 Тарифный план":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /info message: ", log.With("error", err))
@@ -170,7 +164,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🗓 Подписки":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /info message: ", log.With("error", err))
@@ -179,7 +173,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 		// приходы
 	case "💳 Заработная плата":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму заработной платы.\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму заработной платы*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -188,8 +183,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "💱 Побочный доход":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дополнительного дохода\n(подработка, фриланс).\n\nЧерез запятую можно добавить комментарий")
+	case "🌟 Побочный доход":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дополнительного дохода*\n(подработка, фриланс).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -198,8 +194,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "😎 Доход от бизнеса":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от бизнеса.\n\nЧерез запятую можно добавить комментарий")
+	case "💼 Доход от бизнеса":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дохода от бизнеса*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -209,7 +206,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🏦 Доход от инвестиций":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от инвестиций\n(проценты по вкладам, дивиденды).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дохода от инвестиций*\n(проценты по вкладам, дивиденды).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -219,7 +217,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👮‍ Гос. выплаты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму государственных выплат\n(пенсии, субсидии).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму государственных выплат*\n(пенсии, пособия).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -229,7 +228,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🏠 Продажа имущества":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму продажи имущества.\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму продажи имущества*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -239,7 +239,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "⚪️ Прочие доходы":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих поступлений.\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму прочих поступлений*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -250,7 +251,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 		// расходные операции
 	case "🛍 Бытовые траты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму базовых трат\n(еда, напитки, проезд).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму базовых трат*\n(еда, напитки, проезд).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -259,8 +261,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "🫡 Регулярные платежи":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму регулярного платежа\n(кредиты, налоги, аренда,\nкоммунальные платежи).\n\nЧерез запятую можно добавить комментарий")
+	case "♻️ Регулярные платежи":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму регулярного платежа*\n(кредиты, налоги, аренда,\nкоммунальные платежи).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -270,7 +273,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👘 Одежда":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму трат на обновление гардероба.\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму трат на обновление гардероба*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message", log.With("error", err))
 		}
@@ -280,7 +284,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💪 Здоровье":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите расходы на поддержание здоровья\n(аптеки, обследования, визиты к врачам).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите расходы на поддержание здоровья*\n(аптеки, обследования, визиты к врачам).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message", log.With("error", err))
 		}
@@ -290,7 +295,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👨‍🏫 Досуг и образование":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму расхода\n(книги, подписки, курсы, хобби,\n музеи, кино, рестораны).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму расхода*\n(книги, подписки, курсы, хобби,\n музеи, кино, рестораны).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message", log.With("error", err))
 		}
@@ -299,8 +305,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	case "🚀 Инвестиции":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму затраченную на инвестиции\n(вклады, акции, автомобили,\nнедвижимость, предметы роcкоши).\n\nЧерез запятую можно добавить комментарий")
+	case "🏦 Инвестиции":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму затраченную на инвестиции*\n(вклады, акции, покупка автомобилей,\nнедвижимости, предметов роcкоши).\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message", log.With("error", err))
 		}
@@ -310,7 +317,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "⚪️ Прочие расходы":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих расходов\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму прочих расходов*\n\nЧерез запятую можно добавить комментарий")
+		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message", log.With("error", err))
 		}
@@ -522,7 +530,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "💡 Создать напоминание":
+	case "💡 Напоминание":
 		command := "💡 Напоминание"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
@@ -565,7 +573,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👨‍🔬 Экспертная аналитика":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send main menu: %v", log.With("error", err))
@@ -578,7 +586,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🎯 Накопления":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /info message:", log.With("error", err))
@@ -586,7 +594,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🛒 Одно напоминание":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /info message: %v", log.With("error", err))
