@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TODO включить функцию
 func ValidateRightTime(timeStr string) (time.Time, error) {
 	date, err := time.Parse("02.01.2006", timeStr)
 	if err != nil {
