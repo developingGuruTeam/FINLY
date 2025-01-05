@@ -27,6 +27,9 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 
 	updates := bot.GetUpdatesChan(updateConfig)
 
+	// старт работы уведомлений
+	notion.StartReminderServiceWithCron(bot)
+
 	// старт всех кнопок
 	buttonCreator := ButtonsCreate.TelegramButtonCreator{}
 

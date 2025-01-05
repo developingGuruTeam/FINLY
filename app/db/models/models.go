@@ -42,12 +42,11 @@ type Summary struct {
 
 // структура напоминания
 type Reminder struct {
-	ID            uint      `gorm:"primary_key" json:"id"`
-	UserID        uint64    `gorm:"not null" json:"user_id"`          // Telegram ID пользователя
-	Amount        int       `gorm:"not null" json:"amount"`           // Сумма платежа
-	Frequency     string    `gorm:"not null" json:"frequency"`        // Периодичность (неделя/месяц)
-	NextReminder  time.Time `gorm:"not null" json:"next_reminder"`    // Дата следующего напоминания
-	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"` // Дата создания
-	LastUpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"` // Последнее обновление
-	Category      string    `gorm:"not null" json:"category"`
+	ID           uint      `gorm:"primary_key" json:"id"`
+	UserID       uint64    `gorm:"not null" json:"user_id"`          // Telegram ID пользователя
+	Amount       int       `gorm:"not null" json:"amount"`           // Сумма платежа
+	Frequency    string    `gorm:"not null" json:"frequency"`        // Периодичность (неделя/месяц)
+	NextReminder time.Time `gorm:"not null" json:"next_reminder"`    // Дата следующего напоминания
+	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"` // Дата создания
+	Category     string    `gorm:"not null" json:"category"`
 }

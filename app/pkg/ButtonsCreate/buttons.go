@@ -185,8 +185,8 @@ func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarku
 func (t TelegramButtonCreator) CreateFreqButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🫠 Через неделю"),
-			tgbotapi.NewKeyboardButton("🌙 Через месяц"),
+			tgbotapi.NewKeyboardButton("7️⃣ Каждую неделю"),
+			tgbotapi.NewKeyboardButton("🌙 Каждый месяц"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
