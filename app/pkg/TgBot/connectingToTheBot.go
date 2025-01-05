@@ -2,6 +2,8 @@ package TgBot
 
 import (
 	"cachManagerApp/app/internal/methodsForUser"
+	"cachManagerApp/app/internal/notion"
+	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/app/pkg/logger"
 	"os"
 
@@ -26,7 +28,7 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 	updates := bot.GetUpdatesChan(updateConfig)
 
 	// старт всех кнопок
-	buttonCreator := TelegramButtonCreator{}
+	buttonCreator := ButtonsCreate.TelegramButtonCreator{}
 
 	for update := range updates {
 		if update.Message != nil {
@@ -50,10 +52,15 @@ func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
 				}
 			default:
 				// обработчик
-				PushOnButton(bot, update, buttonCreator)
+				chatID := update.Message.Chat.ID
+				if _, ok := notion.RemindersStates[chatID]; ok {
+					// Если пользователь уже в процессе, обрабатываем его ввод
+					notion.HandleReminderInput(bot, update)
+				} else {
+					PushOnButton(bot, update, buttonCreator)
+				}
 			}
 		}
 	}
-
 	return bot, nil
 }

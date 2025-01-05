@@ -3,11 +3,13 @@ package TgBot
 import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
+	"cachManagerApp/app/internal/notion"
+	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/database"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator TelegramButtonCreator, command string) {
+func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, command string) {
 	currency, _ := CurrencyFromChatID(update.Message.Chat.ID)
 
 	switch command {
@@ -50,10 +52,14 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		}
 
 	case "📅 Регулярный платёж":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
-		msg.ParseMode = "Markdown"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send /info message: %v", err)
+		// создаем мапу для работы с напоминаниями
+		notion.StartReminder(bot, update)
+		reminder := buttonCreator.CreateFreqButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите периодичность платежа:")
+		msg.ReplyMarkup = reminder
+		_, err := bot.Send(msg)
+		if err != nil {
+			log.Errorf("Error sending message: %v", err)
 		}
 	}
 }

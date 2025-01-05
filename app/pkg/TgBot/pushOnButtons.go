@@ -4,6 +4,7 @@ import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
+	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"fmt"
@@ -29,7 +30,7 @@ var (
 )
 
 // обработка нажатий на кнопки (команда приходит сюда)
-func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator TelegramButtonCreator) {
+func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator) {
 	if update.Message != nil {
 		// чат ID наполняется
 		chatID := update.Message.Chat.ID
@@ -52,7 +53,7 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Te
 	}
 }
 
-func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator TelegramButtonCreator) {
+func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator) {
 	chatID := update.Message.Chat.ID
 	currency, _ := CurrencyFromChatID(chatID)
 
@@ -133,7 +134,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "/hi":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, randomTextForHi()) // дописать нормальный хэлп
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi()) // дописать нормальный хэлп
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /help message: %v", err)
 		}
