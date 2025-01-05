@@ -4,6 +4,7 @@ import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
 	"cachManagerApp/database"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -50,7 +51,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		}
 
 	case "📅 Регулярный платёж":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {
 			log.Printf("Failed to send /info message: %v", err)
