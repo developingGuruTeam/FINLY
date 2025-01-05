@@ -4,6 +4,7 @@ import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/database"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/go-co-op/gocron" // библиотека для работы с планировщиком
@@ -11,7 +12,7 @@ import (
 )
 
 // Отправляем уведомление пользователю
-func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string) {
+func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string, log *slog.Logger) {
 	clearName, _ := ClearUserNameFromChatID(chatID)
 	if clearName == "" {
 		clearName = userName
@@ -23,18 +24,18 @@ func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string)
 
 	// Отправляем сообщение пользователю
 	if _, err := bot.Send(msg); err != nil {
-		log.Errorf("Ошибка отправки сообщения: %v", err)
+		log.Error("Ошибка отправки сообщения: %v", err)
 	}
 }
 
 // Отправляем уведомления каждый день в 12:00 по среднеевропейскому времени
-func ScheduleNotifications(bot *tgbotapi.BotAPI, chatID int64, userName string) {
+func ScheduleNotifications(bot *tgbotapi.BotAPI, chatID int64, userName string, log *slog.Logger) {
 	// Создаем новый планировщик
 	scheduler := gocron.NewScheduler(time.Local) // use local time without timezone
 
 	// scheduler.Cron("*/1 * * * *").Do(func() { // временная хрень для тестов уведомление раз в минуту НЕ УДАЛЯТЬ!
 	scheduler.Cron("0 12 * * *").Do(func() { // БОЕВАЯ ЧАСТЬ! это уведомление на каждый день в 12
-		SendNotificationToUser(bot, chatID, userName) // Отправляем уведомление
+		SendNotificationToUser(bot, chatID, userName, log) // Отправляем уведомление
 	})
 
 	// асинхронный запуск планировщика!

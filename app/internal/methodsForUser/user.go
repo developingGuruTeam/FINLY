@@ -2,11 +2,12 @@ package methodsForUser
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"errors"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
+	"log/slog"
 	"strings"
 )
 
@@ -17,11 +18,9 @@ type UsersHandlers interface {
 	UpdateUserCurrency(update tgbotapi.Update) error
 }
 
-var log = logger.GetLogger()
-
 type UserMethod struct{}
 
-func (u *UserMethod) PostUser(update tgbotapi.Update) error {
+func (u *UserMethod) PostUser(update tgbotapi.Update, log *slog.Logger) error {
 	user := models.Users{
 		TelegramID: uint64(update.Message.Chat.ID),
 		Name:       update.Message.From.UserName,
@@ -32,16 +31,16 @@ func (u *UserMethod) PostUser(update tgbotapi.Update) error {
 	res := database.DB.Where("telegram_id = ?", user.TelegramID).First(&userExist)
 
 	if res.Error == nil {
-		log.Println("Пользователь существует")
+		log.Info("Пользователь существует", log.With("telegram_id", user.TelegramID))
 		return errors.New("user already exists")
 	}
 
 	if err := database.DB.Create(&user).Error; err != nil {
-		log.Printf("Ошибка добавления нового пользователя: %v", err)
+		log.Error("Ошибка добавления нового пользователя: %v", log.With("Error", err))
 		return err
 	}
 
-	log.Println("Новый пользователь успешно добавлен.")
+	log.Info("Новый пользователь успешно добавлен.", log.With("telegram_id", user.TelegramID))
 	return nil
 }
 

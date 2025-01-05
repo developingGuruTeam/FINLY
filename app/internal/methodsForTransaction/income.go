@@ -2,17 +2,16 @@ package methodsForTransaction
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/pkg/logger"
 	"cachManagerApp/database"
 	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, category string) error {
-	log := logger.GetLogger()
+func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, category string, log *slog.Logger) error {
 	var sum int
 	var err error
 	var userText string
@@ -23,13 +22,13 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 		sum, err = strconv.Atoi(msg[0])
 		userText = msg[1]
 		if err != nil {
-			log.Infof("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы: %v", err)
 			return err
 		}
 	} else {
 		sum, err = strconv.Atoi(update.Message.Text)
 		if err != nil {
-			log.Infof("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы: %v", err)
 			return err
 		}
 	}
@@ -46,15 +45,15 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 	var transactionExist models.Transactions
 	res := database.DB.Where("telegram_id = ? AND created_at = ?", transaction.TelegramID, transaction.CreatedAt).First(&transactionExist).Error
 	if res == nil {
-		log.Debug("Транзакция существует")
+		log.Info("Транзакция существует", log.With("", transaction))
 		return errors.New("transaction already exists")
 	}
 
 	if err := database.DB.Create(&transaction).Error; err != nil {
-		log.Errorf("Ошибка добавления новой транзакции: %v", err)
+		log.Error("Ошибка добавления новой транзакции: %v", err)
 		return err
 
 	}
-	log.Println("Транзакция успешно добавлена")
+	log.Info("Транзакция успешно добавлена", log.With("transaction", transaction))
 	return nil
 }

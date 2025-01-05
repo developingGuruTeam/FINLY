@@ -2,7 +2,8 @@ package methodsForTransaction
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/pkg/logger"
+	"log/slog"
+
 	"cachManagerApp/database"
 	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -11,8 +12,7 @@ import (
 	"time"
 )
 
-func (transactions *TransactionsMethod) PostExpense(update tgbotapi.Update, category string) error {
-	log := logger.GetLogger()
+func (transactions *TransactionsMethod) PostExpense(update tgbotapi.Update, category string, log *slog.Logger) error {
 	var sum int
 	var err error
 	var userText string
@@ -23,13 +23,13 @@ func (transactions *TransactionsMethod) PostExpense(update tgbotapi.Update, cate
 		sum, err = strconv.Atoi(msg[0])
 		userText = msg[1]
 		if err != nil {
-			log.Infof("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы: %v", err)
 			return err
 		}
 	} else {
 		sum, err = strconv.Atoi(update.Message.Text)
 		if err != nil {
-			log.Infof("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы:", log.With("error", err))
 			return err
 		}
 	}
@@ -51,10 +51,10 @@ func (transactions *TransactionsMethod) PostExpense(update tgbotapi.Update, cate
 	}
 
 	if err := database.DB.Create(&transaction).Error; err != nil {
-		log.Errorf("Ошибка добавления новой транзакции: %v", err)
+		log.Error("Ошибка добавления новой транзакции: %v", log.With("error", err))
 		return err
 
 	}
-	log.Println("Транзакция успешно добавлена")
+	log.Info("Транзакция успешно добавлена", log.With("transaction", transaction))
 	return nil
 }
