@@ -27,6 +27,7 @@ func main() {
 			log.Fatalf("Ошибка подключения к Telegram боту: %v", err)
 		}
 	}()
+
 	database.ConnectionDB()
 	log.Println("БД запущена")
 

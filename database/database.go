@@ -39,6 +39,12 @@ func ConnectionDB() {
 		return
 	}
 
+	err = db.AutoMigrate(&models.Reminder{})
+	if err != nil {
+		log.Fatal("Ошибка при миграции", err)
+		return
+	}
+
 	fmt.Println("Миграции успешно выполнены")
 
 	// Очистка таблиц
