@@ -2,10 +2,13 @@ package notion
 
 import (
 	"cachManagerApp/app/db/models"
+	"cachManagerApp/app/internal/notion/rulesForNotion"
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/app/pkg/logger"
+	"cachManagerApp/database"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"strconv"
 	"time"
 )
 
@@ -31,7 +34,6 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	switch {
 	case reminder.Frequency == "":
 		// получаем частоту платежа
-
 		if update.Message.Text == "⬅ В меню" {
 			menuMain := ButtonsCreate.TelegramButtonCreator{}
 			back := menuMain.CreateMainMenuButtons()
@@ -55,6 +57,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		if frequency == "🫠 Через неделю" {
 			reminder.Frequency = "неделя"
 		}
+
 		if frequency == "🌙 Через месяц" {
 			reminder.Frequency = "месяц"
 		}
@@ -68,7 +71,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		// Получаем название платежа
 		reminder.Category = update.Message.Text
 
-		msg := tgbotapi.NewMessage(chatID, "Введите дату следующего платежа (формат: ГГГГ-ММ-ДД):")
+		msg := tgbotapi.NewMessage(chatID, "Введите дату следующего платежа (формат: ДД.ММ.ГГГГ)")
 		_, err := bot.Send(msg)
 		if err != nil {
 			log.Errorf("Ошибка в отправке сообщения в категории напоминания %v", err)
@@ -77,14 +80,39 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	case reminder.NextReminder.IsZero():
 		// Проверяем и сохраняем дату платежа
-		date, err := time.Parse("2006-01-02", update.Message.Text)
+		nextReminder, err := rulesForNotion.ValidateRightTime(update.Message.Text)
 		if err != nil {
-			msg := tgbotapi.NewMessage(chatID, "Неверный формат даты. Попробуйте ещё раз (ГГГГ-ММ-ДД):")
+			msg := tgbotapi.NewMessage(chatID, err.Error())
 			_, _ = bot.Send(msg)
 			return
 		}
 
-		reminder.NextReminder = date
+		reminder.NextReminder = nextReminder
+
+		msg := tgbotapi.NewMessage(chatID, "Введите сумму платежа (только цифры):")
+		_, err = bot.Send(msg)
+		if err != nil {
+			log.Errorf("Ошибка в отправке сообщения суммы: %v", err)
+		}
+
+	case reminder.Amount == 0:
+		// Получаем сумму платежа
+		amount, err := strconv.Atoi(update.Message.Text)
+		if err != nil || amount <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "Неверный ввод. Пожалуйста, введите положительное целое число.")
+			_, _ = bot.Send(msg)
+			return
+		}
+
+		reminder.Amount = amount
+		reminder.CreatedAt = time.Now()
+
+		if err := database.DB.Create(&reminder).Error; err != nil {
+			log.Errorf("Ошибка при сохранении напоминания: %v", err)
+			msg := tgbotapi.NewMessage(chatID, "Произошла ошибка при сохранении напоминания. Попробуйте позже.")
+			_, _ = bot.Send(msg)
+			return
+		}
 
 		menuMain := ButtonsCreate.TelegramButtonCreator{}
 		back := menuMain.CreateMainMenuButtons()
@@ -96,8 +124,9 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 		if _, err := bot.Send(msg); err != nil {
 			log.Errorf("Failed to send main menu: %v", err)
 		}
+
 		// Удаляем напоминание из состояния
-		delete(RemindersStates, update.Message.Chat.ID)
+		delete(RemindersStates, chatID)
 		return
 	}
 }
