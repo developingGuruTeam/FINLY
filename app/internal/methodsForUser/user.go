@@ -5,10 +5,11 @@ import (
 	"cachManagerApp/database"
 	"errors"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"log/slog"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 //go:generate mockery --name=UsersHandlers --output=../tests/mocks --with-expecter
@@ -31,16 +32,16 @@ func (u *UserMethod) PostUser(update tgbotapi.Update, log *slog.Logger) error {
 	res := database.DB.Where("telegram_id = ?", user.TelegramID).First(&userExist)
 
 	if res.Error == nil {
-		log.Info("Пользователь существует", log.With("telegram_id", user.TelegramID))
+		log.Info("Пользователь существует", "telegram_id", user.TelegramID)
 		return errors.New("user already exists")
 	}
 
 	if err := database.DB.Create(&user).Error; err != nil {
-		log.Error("Ошибка добавления нового пользователя: %v", log.With("Error", err))
+		log.Error("Ошибка добавления нового пользователя: %v", "Error", err)
 		return err
 	}
 
-	log.Info("Новый пользователь успешно добавлен.", log.With("telegram_id", user.TelegramID))
+	log.Info("Новый пользователь успешно добавлен.", "telegram_id", user.TelegramID)
 	return nil
 }
 

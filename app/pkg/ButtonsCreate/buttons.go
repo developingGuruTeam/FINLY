@@ -37,10 +37,10 @@ func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardM
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💳 Заработная плата"),
-			tgbotapi.NewKeyboardButton("💱 Побочный доход"),
+			tgbotapi.NewKeyboardButton("🌟 Побочный доход"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("😎 Доход от бизнеса"),
+			tgbotapi.NewKeyboardButton("💼 Доход от бизнеса"),
 			tgbotapi.NewKeyboardButton("🏦 Доход от инвестиций"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -58,7 +58,7 @@ func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboar
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("🛍 Бытовые траты"),
-			tgbotapi.NewKeyboardButton("🫡 Регулярные платежи"),
+			tgbotapi.NewKeyboardButton("♻️ Регулярные платежи"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("👘 Одежда"),
@@ -66,7 +66,7 @@ func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("👨‍🏫 Досуг и образование"),
-			tgbotapi.NewKeyboardButton("🚀 Инвестиции"),
+			tgbotapi.NewKeyboardButton("🏦 Инвестиции"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⚪️ Прочие расходы"),
@@ -158,7 +158,7 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 func (t TelegramButtonCreator) CreateManageMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("💡 Создать напоминание"),
+			tgbotapi.NewKeyboardButton("💡 Напоминание"),
 			tgbotapi.NewKeyboardButton("🗓 Подписки"),
 		),
 		tgbotapi.NewKeyboardButtonRow(

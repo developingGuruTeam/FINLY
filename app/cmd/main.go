@@ -27,7 +27,7 @@ func main() {
 		}()
 
 		if _, err := TgBot.ConnectToTgBot(log); err != nil {
-			log.Error("Ошибка подключения к Telegram боту: %v", err)
+			log.Error("Ошибка подключения к Telegram боту: %s", "err", err)
 		}
 	}()
 
