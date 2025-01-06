@@ -151,7 +151,11 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	// кнопки меню НАСТРОЙКИ
 
 	case "🎭 Изменить имя":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите Ваше новое имя")
+		clearName, _ := ClearUserNameFromChatID(chatID)
+		nameText := fmt.Sprintf("Текущее имя : *%s*\n\nВведите новое имя\n_(до 32 символов)_", clearName)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, nameText)
+		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
 		}
@@ -161,8 +165,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💱 Изменить валюту":
-		messageText := fmt.Sprintf("Текущая валюта: *%s*\n\nВведите новую валюту\n_(3 символа)_\n", currency)
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+		currencyText := fmt.Sprintf("Текущая валюта: *%s*\n\nВведите новую валюту\n_(3 символа)_\n", currency)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, currencyText)
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {

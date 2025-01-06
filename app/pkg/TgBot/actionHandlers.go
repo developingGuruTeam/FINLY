@@ -312,18 +312,37 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 	switch userResp.Action {
 
 	case "change_name":
-		// Обновление имени пользователя в БД
+		newName := strings.TrimSpace(update.Message.Text) // убираем пробелы по обе стороны, если есть
+
+		// проверка нового имени: только буквы и длина от 1 до 32 символов
+		var validName bool = true
+		for _, symbol := range newName {
+			if !unicode.IsLetter(symbol) && symbol != ' ' { // имя только из букв и пробелов
+				validName = false
+				break
+			}
+		}
+
+		if utf8.RuneCountInString(newName) == 0 || utf8.RuneCountInString(newName) > 32 || !validName {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректное имя. Имя должно содержать только буквы и быть не более 32 символов.")
+			bot.Send(msg)
+			return
+		}
+
+		// обновляем имя пользователя
 		user := methodsForUser.UserMethod{}
 		if err := user.UpdateUserName(update); err != nil {
 			log.Error("Ошибка обновления имени пользователя", log.With("error", err))
-		}
-		msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s! Ваше имя успешно изменено.", update.Message.Text))
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Ошибка отправки сообщения об изменении имени", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении имени.")
+			bot.Send(msg)
+			return
 		}
 
+		msgDone := fmt.Sprintf("✅ Ваше имя успешно изменено на %s.", newName)
+		returnToMainMenu(bot, chatID, buttonCreator, msgDone)
+
 	case "change_currency":
-		newCurrency := strings.ToUpper(update.Message.Text) // Преобразуем в верхний регистр
+		newCurrency := strings.ToLower(update.Message.Text) // преобразуем в нижний регистр
 		// проверка новой валюты на алфавит
 		var okCurrency bool = true
 		for _, symbol := range newCurrency {
@@ -334,7 +353,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		}
 		// проверка валюты на длину
 		if utf8.RuneCountInString(newCurrency) != 3 || okCurrency != true {
-			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректный формат валюты.")
+			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректный формат валюты. Валюта должна содержать только буквы и быть не более 3 символов.")
 			bot.Send(msg)
 			return
 		}
@@ -347,7 +366,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			return
 		}
 
-		msgDone := fmt.Sprintf("✅ Ваша валюта изменена на %s.", strings.ToLower(newCurrency))
+		msgDone := fmt.Sprintf("✅ Ваша валюта изменена на %s.", newCurrency)
 		returnToMainMenu(bot, chatID, buttonCreator, msgDone)
 	}
 
