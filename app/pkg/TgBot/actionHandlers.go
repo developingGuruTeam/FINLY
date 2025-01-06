@@ -313,6 +313,9 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 
 	case "change_name":
 		newName := strings.TrimSpace(update.Message.Text) // убираем пробелы по обе стороны, если есть
+		if newName == "" {
+			newName = "Пользователь" // поправить на никнейм тг, если есть
+		}
 
 		// проверка нового имени: только буквы и длина от 1 до 32 символов
 		var validName bool = true

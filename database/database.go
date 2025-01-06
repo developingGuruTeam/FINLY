@@ -49,20 +49,11 @@ func ConnectionDB(log *slog.Logger) {
 	log.Info("Миграции успешно выполнены")
 
 	// Очистка таблиц
-	/*
-		// Очистка операций
-		err = db.Exec("DELETE FROM transactions").Error
-		if err != nil {
-			log.Fatalf("Ошибка очистки данных в таблице транзакций: %v", err)
-		}
-		log.Println("Данные из таблицы транзакций успешно удалены!")
 
-		// Очистка таблицы пользователей
-		err = db.Exec("DELETE FROM users").Error
-		if err != nil {
-			log.Fatalf("Ошибка очистки данных в таблице пользователей: %v", err)
-		}
-		log.Println("Данные из таблицы пользователей успешно удалены!")
+	// Очистка операций
+	//db.Exec("DELETE FROM transactions")
 
-	*/
+	// Очистка таблицы пользователей
+	//db.Exec("DELETE FROM users")
+
 }
