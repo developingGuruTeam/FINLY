@@ -3,7 +3,6 @@ package notion
 import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/database"
-	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -15,9 +14,8 @@ import (
 func StartReminderServiceWithCron(bot *tgbotapi.BotAPI, log *slog.Logger) {
 	c := cron.New()
 
-	// TODO изменить на 12:00
-	// "0 9 * * *" означает "каждый день в 9:00"
-	c.AddFunc("*/1 * * * *", func() {
+	// "0 11 * * *" означает "каждый день в 11:00"
+	c.AddFunc("0 11 * * *", func() { // использует локально время сервера
 		err := processReminders(bot, log)
 		if err != nil {
 			log.Error(
@@ -32,39 +30,56 @@ func StartReminderServiceWithCron(bot *tgbotapi.BotAPI, log *slog.Logger) {
 
 func processReminders(bot *tgbotapi.BotAPI, log *slog.Logger) error {
 	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	var reminders []models.Reminder
-	if err := database.DB.Where("next_reminder <= ?", now).Find(&reminders).Error; err != nil {
-		return errors.New("Ошибка в поиске напоминаний")
+	if err := database.DB.Where("next_reminder BETWEEN ? AND ?", startOfDay, endOfDay).Find(&reminders).Error; err != nil {
+		return fmt.Errorf("Ошибка в поиске напоминаний :%v", err)
 	}
 
+	remindersByUser := make(map[uint64][]models.Reminder)
 	for _, reminder := range reminders {
-		sendReminder(bot, reminder, log)
+		remindersByUser[reminder.UserID] = append(remindersByUser[reminder.UserID], reminder)
+	}
 
-		if reminder.Frequency == "неделя" {
-			reminder.NextReminder = reminder.NextReminder.AddDate(0, 0, 7)
-		} else if reminder.Frequency == "месяц" {
-			reminder.NextReminder = reminder.NextReminder.AddDate(0, 1, 0)
-		} else {
-			// если нет частоты или одноразовое — можно либо удалить, либо больше не трогать ?
-			reminder.NextReminder = time.Date(2100, 1, 1, 0, 0, 0, 0, time.Local)
-		}
+	for userID, userReminders := range remindersByUser {
+		sendReminders(bot, userID, userReminders, log)
 
-		if err := database.DB.Save(&reminder).Error; err != nil {
-			log.Error("Error updating reminder:", "error", err)
+		for _, reminder := range userReminders {
+			if reminder.Frequency == "неделя" {
+				reminder.NextReminder = reminder.NextReminder.AddDate(0, 0, 7)
+			} else if reminder.Frequency == "месяц" {
+				reminder.NextReminder = reminder.NextReminder.AddDate(0, 1, 0)
+			} else {
+				reminder.NextReminder = time.Date(2100, 1, 1, 0, 0, 0, 0, time.Local)
+			}
+
+			if err := database.DB.Save(&reminder).Error; err != nil {
+				fmt.Printf("Ошибка при обновлении напоминания: %v\n", err)
+			}
 		}
 	}
 	return nil
 }
 
-func sendReminder(bot *tgbotapi.BotAPI, reminder models.Reminder, log *slog.Logger) {
-	chatID := int64(reminder.UserID)
+func sendReminders(bot *tgbotapi.BotAPI, userID uint64, reminders []models.Reminder, log *slog.Logger) {
+	chatID := int64(userID)
 
-	text := fmt.Sprintf(
-		"☀️Мы к Вам с напоминанием\n\nНе забудьте оплатить сегодня платеж по категории '%s'\nСумма платежа: %d\n\n Хорошего дня 😊\n",
-		reminder.Category,
-		reminder.Amount,
-	)
+	if len(reminders) == 0 {
+		return
+	}
+
+	text := "🌞 Мы к Вам с напоминанием \n\n Не забудьте сегодня оплатить платеж(и) по категориям:\n"
+	for i, reminder := range reminders {
+		text += fmt.Sprintf(
+			"%d. Категория: %s\n  Сумма: %d\n\n",
+			i+1,
+			reminder.Category,
+			reminder.Amount,
+		)
+	}
+	text += "Желаем Вам хорошего дня! 😊\n"
 
 	msg := tgbotapi.NewMessage(chatID, text)
 	_, err := bot.Send(msg)
