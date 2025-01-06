@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"log/slog"
 	"strconv"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -15,7 +18,7 @@ import (
 func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, transResp TransactionResponse, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	switch transResp.Action {
-	// incomes
+	// Доходы
 	case "salary":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Заработная плата"
@@ -39,145 +42,263 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 	case "additional_income":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Побочный доход"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save additional income: %v", log.With("error", err))
+			log.Info("Failed to save additional income: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Побочный доход сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send additional income message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Побочный доход успешно сохранен."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "business_income":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Доход от бизнеса"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save business income: %v", log.With("error", err))
+			log.Info("Failed to save business income: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от бизнеса сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send business income message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Доход от бизнеса успешно сохранен."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "investment_income":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Доход от инвестиций"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save investment income: %v", log.With("error", err))
+			log.Info("Failed to save investment income: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от инвестиций сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send investment income message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Доход от инвестиций успешно сохранен."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "state_payments":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Гос. выплаты"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save investment income: %v", log.With("error", err))
+			log.Info("Failed to save state payments: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от государства сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send state income message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Гос. выплаты успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "property_sales":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Продажа имущества"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save investment income: %v", log.With("error", err))
+			log.Info("Failed to save property sales: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Доход от продажи имущества сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send investment income message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Продажа имущества успешно сохранена."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "other_income":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Прочие доходы"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Error("Failed to save other income: %v", log.With("error", err))
+			log.Info("Failed to save other income: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Прочие доходы сохранены.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send other income message: %v", log.With("error", err))
-		}
-	// expenses
+
+		doneMsg := "✅ Прочие доходы успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
+
+	// Расходы
 	case "basic_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Бытовые траты"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save basic expense: %v", log.With("error", err))
+			log.Info("Failed to save basic expense: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Сумма базовых трат сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send basic expense message: ", log.With("error", err))
-		}
+
+		doneMsg := "✅ Бытовые траты успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "regular_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Регулярные платежи"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save regular expense:", log.With("error", err))
+			log.Info("Failed to save regular expense: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Регулярный платеж сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send regular expense message:", log.With("error", err))
-		}
+
+		doneMsg := "✅ Регулярные платежи успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "clothes":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Одежда"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save clothes", log.With("error", err))
+			log.Info("Failed to save clothes: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Расход на обновление гардероба сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send clothes message", log.With("error", err))
-		}
+
+		doneMsg := "✅ Траты на одежду успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "health":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Здоровье"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save health", log.With("error", err))
+			log.Info("Failed to save health: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Расход на поддержание здоровья сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send health message", log.With("error", err))
-		}
+
+		doneMsg := "✅ Траты на здоровье успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "leisure_education":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Досуг и образование"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save leisure_education expense", log.With("error", err))
+			log.Info("Failed to save leisure and education expense: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Расход сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send leisure_education message", log.With("error", err))
-		}
+
+		doneMsg := "✅ Траты на досуг и образование успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "investment_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Инвестиции"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save investment expense", log.With("error", err))
+			log.Info("Failed to save investment expense: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Инвестиционный расход сохранен.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send investment expense message", log.With("error", err))
-		}
+
+		doneMsg := "✅ Инвестиционные траты успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "other_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Прочие расходы"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostExpense(update, category, log); err != nil {
-			log.Error("Failed to save other expense", log.With("error", err))
+			log.Info("Failed to save other expenses: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Прочие расходы сохранены.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send other expense message", log.With("error", err))
-		}
+
+		doneMsg := "✅ Прочие траты успешно сохранены."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 	}
 	mu.Lock()
 	delete(transactionStates, chatID) // удаляем состояние после обработки
@@ -185,23 +306,10 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 
 }
 
-func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp UserResponse, log *slog.Logger) {
+func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp UserResponse, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 
 	switch userResp.Action {
-	case "expense":
-		amount := update.Message.Text
-		msg := tgbotapi.NewMessage(chatID, "Сумма расхода "+amount+" сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Ошибка отправки сообщения о расходе", log.With("error", err))
-		}
-
-	case "income":
-		amount := update.Message.Text
-		msg := tgbotapi.NewMessage(chatID, "Сумма прихода "+amount+" сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Ошибка отправки сообщения о приходе", log.With("error", err))
-		}
 
 	case "change_name":
 		// Обновление имени пользователя в БД
@@ -215,14 +323,32 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		}
 
 	case "change_currency":
+		newCurrency := strings.ToUpper(update.Message.Text) // Преобразуем в верхний регистр
+		// проверка новой валюты на алфавит
+		var okCurrency bool = true
+		for _, symbol := range newCurrency {
+			if !unicode.IsLetter(symbol) {
+				okCurrency = false
+				break
+			}
+		}
+		// проверка валюты на длину
+		if utf8.RuneCountInString(newCurrency) != 3 || okCurrency != true {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректный формат валюты.")
+			bot.Send(msg)
+			return
+		}
+		// обновляем валюту пользователя
 		user := methodsForUser.UserMethod{}
 		if err := user.UpdateUserCurrency(update); err != nil {
 			log.Error("Ошибка обновления валюты", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении валюты")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Ваша валюта изменена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Ошибка отправки сообщения об изменении валюты", log.With("error", err))
-		}
+
+		msgDone := fmt.Sprintf("✅ Ваша валюта изменена на %s.", strings.ToLower(newCurrency))
+		returnToMainMenu(bot, chatID, buttonCreator, msgDone)
 	}
 
 	mu.Lock()

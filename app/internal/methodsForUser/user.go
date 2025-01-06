@@ -72,9 +72,6 @@ func (u *UserMethod) UpdateUserCurrency(update tgbotapi.Update) error {
 
 	// делаем тут валюту из трех букв и точку на конце
 	runes := []rune(newCurrency)
-	if len(runes) > 3 {
-		runes = runes[:3]
-	}
 	newCurrency = fmt.Sprintf("%s.", string(runes))
 
 	res := database.DB.Model(&models.Users{}).
