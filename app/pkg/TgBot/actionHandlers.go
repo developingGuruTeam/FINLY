@@ -13,7 +13,9 @@ import (
 func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, transResp TransactionResponse, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	switch transResp.Action {
-	// Доходы
+
+	// ДОХОДЫ
+
 	case "salary":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Заработная плата"
@@ -154,7 +156,8 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 		doneMsg := "✅ Прочие доходы успешно сохранены."
 		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
-	// Расходы
+	// РАСХОДЫ
+
 	case "basic_expense":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Бытовые траты"

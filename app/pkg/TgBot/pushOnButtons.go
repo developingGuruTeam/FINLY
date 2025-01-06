@@ -274,7 +274,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		// кнопка меню РАСХОД
 
 	case "🛍 Бытовые траты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму базовых трат\n_(еда, напитки, проезд)_\n")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму бытовых расходов\n_(еда, напитки, проезд)_\n")
 		msg.ParseMode = "Markdown"
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
@@ -600,8 +600,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 		handled = true
 
-	case "🤑 Cальдо":
-		command := "сальдо"
+	case "⚖️ Cальдо":
+		command := "⚖️ Cальдо"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 

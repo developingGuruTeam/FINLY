@@ -14,7 +14,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 
 	switch command {
 
-	case "сальдо":
+	case "⚖️ Cальдо":
 		saldo := buttonCreator.CreateSaldoAnalyticButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период")
 		msg.ReplyMarkup = saldo
