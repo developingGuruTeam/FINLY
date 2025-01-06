@@ -18,7 +18,7 @@ func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, trans
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Заработная плата"
 		if err := transaction.PostIncome(update, category, log); err != nil {
-			log.Info("Failed to save salary: %v", log.With("error", err))
+			log.Info("Failed to save salary: %s", log.With("error", err))
 		}
 		msg := tgbotapi.NewMessage(chatID, "Заработная плата сохранена.")
 		if _, err := bot.Send(msg); err != nil {
