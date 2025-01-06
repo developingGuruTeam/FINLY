@@ -15,7 +15,7 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
-		log.Error("Failed to connect to Telegram bot API: %v", err)
+		log.Error("Failed to connect to Telegram bot API:", slog.Any("error", err))
 	}
 	log.Info("Successfully connected to Telegram bot API!")
 
@@ -43,14 +43,14 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
 				userHandler := &methodsForUser.UserMethod{}
 				if err := userHandler.PostUser(update, log); err != nil {
-					log.Info("Ошибка при добавлении пользователя: %v", log.With("error", err))
+					log.Error("Failed to add user:", slog.Any("error", err))
 				} else {
-					log.Info("Пользователь успешно добавлен.", log.With("telegram_id", update.Message.Chat.ID))
+					log.Info("User successfully added.", slog.Int64("telegram_id", update.Message.Chat.ID))
 				}
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать! 👋\nЯ — ваш финансовый помощник.\nБлагодаря мне у вас есть возможность взять свои денежные средства под контроль.\nВперёд к финансовому успеху!\nВыберите действие в меню ✏\nБазовые команды бота:\n/help - Помощь в использовании\n/hi - Мотивационное сообщение")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать! \nЯ — ваш финансовый помощник.\nБлагодаря мне у вас есть возможность взять свои денежные средства под контроль.\nВперёд к финансовому успеху!\nВыберите действие в меню \nБазовые команды бота:\n/help - Помощь в использовании\n/hi - Мотивационное сообщение")
 				msg.ReplyMarkup = mainMenuKeyboard
 				if _, err := bot.Send(msg); err != nil {
-					log.Error("Failed to send message with main menu buttons: %v", log.With("error", err))
+					log.Error("Failed to send message with main menu buttons:", slog.Any("error", err))
 				}
 			default:
 				// обработчик
