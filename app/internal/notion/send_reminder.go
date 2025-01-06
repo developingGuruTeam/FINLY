@@ -22,8 +22,7 @@ func StartReminderServiceWithCron(bot *tgbotapi.BotAPI, log *slog.Logger) {
 		if err != nil {
 			log.Error(
 				"Error while processing reminders: %v\n",
-				log.With("error", err),
-			)
+				"error", err)
 		}
 	})
 
@@ -52,7 +51,7 @@ func processReminders(bot *tgbotapi.BotAPI, log *slog.Logger) error {
 		}
 
 		if err := database.DB.Save(&reminder).Error; err != nil {
-			log.Error("Error updating reminder:", log.With("error", err))
+			log.Error("Error updating reminder:", "error", err)
 		}
 	}
 	return nil
@@ -72,8 +71,6 @@ func sendReminder(bot *tgbotapi.BotAPI, reminder models.Reminder, log *slog.Logg
 	if err != nil {
 		log.Error(
 			"Failed to send reminder to user %d:",
-			log.With("user_id", chatID),
-			log.With("error", err),
-		)
+			"error", err)
 	}
 }

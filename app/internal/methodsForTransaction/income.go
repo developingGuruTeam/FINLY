@@ -23,13 +23,13 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 		sum, err = strconv.Atoi(msg[0])
 		userText = msg[1]
 		if err != nil {
-			log.Info("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы: %v", "err", err)
 			return err
 		}
 	} else {
 		sum, err = strconv.Atoi(update.Message.Text)
 		if err != nil {
-			log.Info("Ошибка преобразования суммы: %v", err)
+			log.Info("Ошибка преобразования суммы: %v", "err", err)
 			return err
 		}
 	}
@@ -46,15 +46,15 @@ func (transactions *TransactionsMethod) PostIncome(update tgbotapi.Update, categ
 	var transactionExist models.Transactions
 	res := database.DB.Where("telegram_id = ? AND created_at = ?", transaction.TelegramID, transaction.CreatedAt).First(&transactionExist).Error
 	if res == nil {
-		log.Info("Транзакция существует", log.With("", transaction))
+		log.Info("Транзакция существует", "", transaction)
 		return errors.New("transaction already exists")
 	}
 
 	if err := database.DB.Create(&transaction).Error; err != nil {
-		log.Error("Ошибка добавления новой транзакции: %v", err)
+		log.Error("Ошибка добавления новой транзакции: %v", "err", err)
 		return err
 
 	}
-	log.Info("Транзакция успешно добавлена", log.With("transaction", transaction))
+	log.Info("Транзакция успешно добавлена", "transaction", transaction)
 	return nil
 }

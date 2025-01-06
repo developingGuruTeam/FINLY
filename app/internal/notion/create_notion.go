@@ -38,7 +38,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы вернулись в главное меню")
 			msg.ReplyMarkup = back
 			if _, err := bot.Send(msg); err != nil {
-				log.Error("Failed to send main menu: %v", log.With("Error", err))
+				log.Error("Failed to send main menu: %v", "Error", err)
 			}
 			// Удаляем напоминание из состояния
 			delete(RemindersStates, update.Message.Chat.ID)
@@ -72,7 +72,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 		msg := tgbotapi.NewMessage(chatID, "Введите дату следующего регулярного платежа (формат: ДД.ММ.ГГГГ), например 01.02.2006")
 		_, err := bot.Send(msg)
 		if err != nil {
-			log.Error("Ошибка в отправке сообщения в категории напоминания %v", log.With("Error", err))
+			log.Error("Ошибка в отправке сообщения в категории напоминания %v", "Error", err)
 		}
 		return
 
@@ -95,7 +95,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 		msg := tgbotapi.NewMessage(chatID, "Введите сумму платежа (только цифры), например 23300")
 		_, err = bot.Send(msg)
 		if err != nil {
-			log.Error("Ошибка в отправке сообщения суммы: %v", log.With("Error", err))
+			log.Error("Ошибка в отправке сообщения суммы: %v", "Error", err)
 		}
 
 	case reminder.Amount == 0:
@@ -111,7 +111,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 		reminder.CreatedAt = time.Now()
 
 		if err := database.DB.Create(&reminder).Error; err != nil {
-			log.Error("Ошибка при сохранении напоминания: %v", log.With("Error", err))
+			log.Error("Ошибка при сохранении напоминания: %v", "Error", err)
 			msg := tgbotapi.NewMessage(chatID, "Произошла ошибка при сохранении напоминания. Попробуйте позже.")
 			_, _ = bot.Send(msg)
 			return
@@ -123,7 +123,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 
 		msg.ReplyMarkup = back
 		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send main menu: %v", log.With("Error", err))
+			log.Error("Failed to send main menu: %v", "Error", err)
 		}
 
 		// Удаляем напоминание из состояния
