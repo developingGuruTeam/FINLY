@@ -4,6 +4,7 @@ import (
 	"cachManagerApp/app/db/models"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -119,14 +120,38 @@ func GenerateWeeklyExpensesReport(categorySummary map[string]uint64, currency st
 		totalExpense += value
 	}
 
-	report := "📊 *Расходы за неделю*\n\n"
+	// Рассчитываем проценты
+	totalPercentage := 0
+	percentages := make(map[string]int)
+	var maxCategory string
+	maxValue := 0
 
 	for category, value := range categorySummary {
-		percentage := (float64(value) / float64(totalExpense)) * 100
+		percentage := int(math.Round((float64(value) / float64(totalExpense)) * 100))
+		percentages[category] = percentage
+		totalPercentage += percentage
+
+		// Сохраняем категорию с максимальным значением
+		if percentage > maxValue {
+			maxValue = percentage
+			maxCategory = category
+		}
+	}
+
+	// Корректируем разницу процентов, если сумма не равна 100
+	if totalPercentage != 100 {
+		difference := 100 - totalPercentage
+		percentages[maxCategory] += difference
+	}
+
+	// Формируем текстовый отчет
+	report := "📊 *Расходы за неделю*\n\n"
+	for category, value := range categorySummary {
+		percentage := percentages[category]
 		if emoji, exists := categoryDetails[category]; exists {
-			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, int(percentage))
+			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, percentage)
 		} else {
-			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, int(percentage))
+			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, percentage)
 		}
 	}
 
@@ -181,27 +206,46 @@ func GenerateMonthlyExpensesReport(categorySummary map[string]uint64, currency s
 		return "📊 За прошедший месяц расходы отсутствуют."
 	}
 
-	// общий расход
 	totalExpense := uint64(0)
 	for _, value := range categorySummary {
 		totalExpense += value
 	}
 
-	report := "📊 *Расходы за месяц*\n\n"
+	// Рассчитываем проценты
+	totalPercentage := 0
+	percentages := make(map[string]int)
+	var maxCategory string
+	maxValue := 0
 
 	for category, value := range categorySummary {
-		// считаем проценты
-		percentage := (float64(value) / float64(totalExpense)) * 100
+		percentage := int(math.Round((float64(value) / float64(totalExpense)) * 100))
+		percentages[category] = percentage
+		totalPercentage += percentage
 
-		// Добавляем строку отчёта
-		if emoji, exists := categoryDetails[category]; exists {
-			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, int(percentage))
-		} else {
-			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, int(percentage))
+		// Сохраняем категорию с максимальным значением
+		if percentage > maxValue {
+			maxValue = percentage
+			maxCategory = category
 		}
 	}
 
-	// финиш
+	// Корректируем разницу процентов, если сумма не равна 100
+	if totalPercentage != 100 {
+		difference := 100 - totalPercentage
+		percentages[maxCategory] += difference
+	}
+
+	// Формируем текстовый отчет
+	report := "📊 *Расходы за месяц*\n\n"
+	for category, value := range categorySummary {
+		percentage := percentages[category]
+		if emoji, exists := categoryDetails[category]; exists {
+			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, percentage)
+		} else {
+			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, percentage)
+		}
+	}
+
 	report += fmt.Sprintf("\n💸 Общие расходы за месяц: *%d* %s", totalExpense, currency)
 
 	return report

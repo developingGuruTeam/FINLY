@@ -33,13 +33,21 @@ func GenerateWeeklyIncomePieChartURL(categorySummary map[string]uint64) (string,
 		totalIncome += value
 	}
 
-	// получаем в процентах суммы
+	// получаем проценты с округлением
+	var totalPercentage int
 	for category, value := range categorySummary {
 		if value > 0 {
 			labels = append(labels, category)
-			percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100))
+			percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100)) // Классическое округление
 			values = append(values, percentage)
+			totalPercentage += percentage
 		}
+	}
+
+	// корректируем проценты, если итоговая сумма не равна 100
+	if totalPercentage != 100 {
+		difference := 100 - totalPercentage
+		values[0] += difference // добавляем разницу к первой категории, как делает это квикчарт
 	}
 
 	// присваеваем цвета
@@ -105,13 +113,21 @@ func GenerateIncomePieChartURL(categorySummary map[string]uint64, totalIncome ui
 		"Прочие доходы":       "#D3D3D3", // серый
 	}
 
-	// преобразуем суммы в целые %% учитывая только не нули
+	// рассчитываем проценты с округлением
+	var totalPercentage int
 	for category, value := range categorySummary {
 		if value > 0 {
 			labels = append(labels, category)
-			percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100)) // округление без дробей
+			percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100)) // Классическое округление
 			values = append(values, percentage)
+			totalPercentage += percentage
 		}
+	}
+
+	// корректируем проценты, если итоговая сумма не равна 100
+	if totalPercentage != 100 {
+		difference := 100 - totalPercentage
+		values[0] += difference // добавляем разницу к первой категории
 	}
 
 	// присваиваем цвета для категорий

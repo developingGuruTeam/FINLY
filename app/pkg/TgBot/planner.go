@@ -1,8 +1,6 @@
 package TgBot
 
 import (
-	"cachManagerApp/app/db/models"
-	"cachManagerApp/database"
 	"fmt"
 	"log/slog"
 	"time"
@@ -40,15 +38,4 @@ func ScheduleNotifications(bot *tgbotapi.BotAPI, chatID int64, userName string, 
 
 	// асинхронный запуск планировщика!
 	scheduler.StartAsync()
-}
-
-// Получение имени из БД
-func ClearUserNameFromChatID(chatID int64) (string, error) {
-	var user models.Users
-	result := database.DB.Where("telegram_id = ?", chatID).First(&user)
-	if result.Error != nil {
-		return "", result.Error
-	}
-	fmt.Println(user.Name)
-	return user.Name, nil
 }
