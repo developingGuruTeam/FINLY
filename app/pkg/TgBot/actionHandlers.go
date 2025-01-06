@@ -3,27 +3,38 @@ package TgBot
 import (
 	"cachManagerApp/app/internal/methodsForTransaction"
 	"cachManagerApp/app/internal/methodsForUser"
+	"cachManagerApp/app/pkg/ButtonsCreate"
 	"fmt"
 	"log/slog"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // Обработка транзакции
-func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, transResp TransactionResponse, log *slog.Logger) {
+func handleTransactionAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, transResp TransactionResponse, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	switch transResp.Action {
 	// incomes
 	case "salary":
 		transaction := methodsForTransaction.TransactionsMethod{}
 		category := "Заработная плата"
+		sum, err := strconv.Atoi(update.Message.Text)
+		if err != nil || sum <= 0 {
+			msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+			bot.Send(msg)
+			return
+		}
+
 		if err := transaction.PostIncome(update, category, log); err != nil {
 			log.Info("Failed to save salary: %s", log.With("error", err))
+			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+			bot.Send(msg)
+			return
 		}
-		msg := tgbotapi.NewMessage(chatID, "Заработная плата сохранена.")
-		if _, err := bot.Send(msg); err != nil {
-			log.Info("Failed to send salary message: %v", log.With("error", err))
-		}
+
+		doneMsg := "✅ Заработная плата успешно сохранена."
+		returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
 
 	case "additional_income":
 		transaction := methodsForTransaction.TransactionsMethod{}
@@ -217,4 +228,17 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 	mu.Lock()
 	delete(userStates, chatID) // удаляем состояние после обработки
 	mu.Unlock()
+}
+
+// возврат кнопок меню и удаления состояния после обработки транзакции
+func returnToMainMenu(bot *tgbotapi.BotAPI, chatID int64, buttonCreator ButtonsCreate.TelegramButtonCreator, msg string) {
+	// создаем кнопки главного меню
+	mainMenu := buttonCreator.CreateMainMenuButtons()
+
+	// отправляем пустое сообщение с кнопками
+	menuMsg := tgbotapi.NewMessage(chatID, msg)
+	menuMsg.ReplyMarkup = mainMenu // показываем кнопки
+	bot.Send(menuMsg)
+
+	delete(transactionStates, chatID)
 }
