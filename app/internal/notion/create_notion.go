@@ -2,6 +2,7 @@ package notion
 
 import (
 	"cachManagerApp/app/db/models"
+	"cachManagerApp/app/internal/notion/rules_for_notion"
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/database"
 	"log/slog"
@@ -79,16 +80,12 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 	case reminder.NextReminder.IsZero():
 		// Проверяем и сохраняем дату платежа
 
-		// TODO включить
-		//nextReminder, err := rulesForNotion.ValidateRightTime(update.Message.Text)
-		//if err != nil {
-		//	msg := tgbotapi.NewMessage(chatID, err.Error())
-		//	_, _ = bot.Send(msg)
-		//	return
-		//}
-
-		// надо поменять после тестов
-		nextReminder, err := time.Parse("02.01.2006", update.Message.Text)
+		nextReminder, err := rules_for_notion.ValidateRightTime(update.Message.Text)
+		if err != nil {
+			msg := tgbotapi.NewMessage(chatID, err.Error())
+			_, _ = bot.Send(msg)
+			return
+		}
 
 		reminder.NextReminder = nextReminder
 
