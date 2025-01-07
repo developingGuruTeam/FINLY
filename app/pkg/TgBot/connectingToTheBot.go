@@ -1,6 +1,7 @@
 package TgBot
 
 import (
+	"cachManagerApp/app/internal/methodsForUser"
 	"cachManagerApp/app/internal/notion"
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"log/slog"
@@ -35,6 +36,14 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 		if update.Message != nil {
 			switch update.Message.Text {
 			case "/start":
+
+				userHandler := &methodsForUser.UserMethod{}
+				if err := userHandler.PostUser(update, log); err != nil {
+					log.Info("Ошибка при добавлении пользователя:", slog.Any("error", err))
+				} else {
+					log.Info("Пользователь успешно добавлен.", slog.Any("user added", userHandler))
+				}
+
 				// планировщик отложенных уведомлений запускаем для пользователя вместе со стартом бота
 				ScheduleNotifications(bot, update.Message.Chat.ID, update.Message.From.UserName, log)
 
