@@ -1,29 +1,31 @@
 package TgBot
 
 import (
-	"cachManagerApp/app/db/models"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
-	"cachManagerApp/database"
+	"cachManagerApp/app/internal/notion"
+	"cachManagerApp/app/pkg/ButtonsCreate"
+	"log/slog"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator TelegramButtonCreator, command string) {
+func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, command string, log *slog.Logger) {
 	currency, _ := CurrencyFromChatID(update.Message.Chat.ID)
 
 	switch command {
 
-	case "сальдо":
+	case "⚖️ Cальдо":
 		saldo := buttonCreator.CreateSaldoAnalyticButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период")
 		msg.ReplyMarkup = saldo
 		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send main menu: %v", err)
+			log.Info("Failed to send main menu: %v", slog.Any("error", err))
 		}
 
 	case "💲Сальдо за неделю":
 		summary, err := methodsForSummary.AnalyseBySaldoWeek(update)
 		if err != nil {
-			log.Printf("Failed to get summary in the week period: %v", err)
+			log.Info("Failed to get summary in the week period: %v", slog.Any("error", err))
 		}
 		response := methodsForSummary.GenerateWeeklySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
@@ -33,7 +35,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 	case "💰Сальдо за месяц":
 		summary, err := methodsForSummary.AnalyseBySaldoMonth(update)
 		if err != nil {
-			log.Printf("Failed to get summary in the month period: %v", err)
+			log.Info("Failed to get summary in the month period: %v", slog.Any("error", err))
 		}
 		response := methodsForSummary.GenerateMonthlySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
@@ -41,29 +43,23 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		_, _ = bot.Send(newMsg)
 
 	// напоминания об оплате
-	case "💡 Напоминание":
+	case "🛎 Напоминание":
 		notion := buttonCreator.CreateNotionButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите тип напоминания")
 		msg.ReplyMarkup = notion
 		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send main menu: %v", err)
+			log.Info("Failed to send main menu: %v", slog.Any("error", err))
 		}
 
-	case "📅 Регулярный платёж":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n\n`Ожидаемая дата выхода обновления 20.01.2025`")
-		msg.ParseMode = "Markdown"
-		if _, err := bot.Send(msg); err != nil {
-			log.Printf("Failed to send /info message: %v", err)
+	case "🔁 Регулярный платёж":
+		// создаем мапу для работы с напоминаниями
+		notion.StartReminder(bot, update)
+		reminder := buttonCreator.CreateFreqButtons()
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите периодичность платежа:")
+		msg.ReplyMarkup = reminder
+		_, err := bot.Send(msg)
+		if err != nil {
+			log.Error("Error sending message:", slog.Any("error", err))
 		}
 	}
-}
-
-// Получение валюты из бд
-func CurrencyFromChatID(chatID int64) (string, error) {
-	var user models.Users
-	result := database.DB.Where("telegram_id = ?", chatID).First(&user)
-	if result.Error != nil {
-		return "", result.Error
-	}
-	return user.Currency, nil
 }

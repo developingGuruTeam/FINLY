@@ -3,12 +3,15 @@ package main
 import (
 	"cachManagerApp/app/config"
 	"cachManagerApp/app/pkg/TgBot"
+	"cachManagerApp/app/pkg/logger/slog_init"
 	"cachManagerApp/database"
-	"log"
 	"sync"
 )
 
 func main() {
+	log := slog_init.Init()
+	log.Info("Logger запущен")
+	log.Debug("Цвет прикольный")
 	config.LoadEnviroment()
 	var wg sync.WaitGroup
 
@@ -19,17 +22,17 @@ func main() {
 		defer wg.Done()
 		defer func() {
 			if r := recover(); r != nil {
-				log.Printf("Возникла паника при обработке пользователя: %v", r)
+				log.Info("Возникла паника при обработке пользователя: %v", r)
 			}
 		}()
 
-		if _, err := TgBot.ConnectToTgBot(); err != nil {
-			log.Fatalf("Ошибка подключения к Telegram боту: %v", err)
+		if _, err := TgBot.ConnectToTgBot(log); err != nil {
+			log.Error("Ошибка подключения к Telegram боту: %s", "err", err)
 		}
 	}()
-	database.ConnectionDB()
-	log.Println("БД запущена")
+
+	database.ConnectionDB(log)
+	log.Info("БД запущена")
 
 	wg.Wait()
-
 }

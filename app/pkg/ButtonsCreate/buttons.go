@@ -1,8 +1,9 @@
-package TgBot
+package ButtonsCreate
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"math/rand"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // интерфейс создания кнопок
@@ -23,7 +24,20 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("📊 Отчеты"),
+			tgbotapi.NewKeyboardButton("🕹 Управление"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("ℹ️ Информация"),
 			tgbotapi.NewKeyboardButton("⚙️ Настройки"),
+		),
+	)
+}
+
+// кнопка для пропуска комментария
+func (b *TelegramButtonCreator) CreateCommentButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("⤵️ Пропустить"),
 		),
 	)
 }
@@ -32,10 +46,10 @@ func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardM
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💳 Заработная плата"),
-			tgbotapi.NewKeyboardButton("💱 Побочный доход"),
+			tgbotapi.NewKeyboardButton("🌟 Побочный доход"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("😎 Доход от бизнеса"),
+			tgbotapi.NewKeyboardButton("💼 Доход от бизнеса"),
 			tgbotapi.NewKeyboardButton("🏦 Доход от инвестиций"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
@@ -53,7 +67,7 @@ func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboar
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("🛍 Бытовые траты"),
-			tgbotapi.NewKeyboardButton("🫡 Регулярные платежи"),
+			tgbotapi.NewKeyboardButton("♻️ Регулярные платежи"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("👘 Одежда"),
@@ -61,7 +75,7 @@ func (t TelegramButtonCreator) CreateExpensesMenuButtons() tgbotapi.ReplyKeyboar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("👨‍🏫 Досуг и образование"),
-			tgbotapi.NewKeyboardButton("🚀 Инвестиции"),
+			tgbotapi.NewKeyboardButton("🏦 Инвестиции"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⚪️ Прочие расходы"),
@@ -113,11 +127,12 @@ func (t TelegramButtonCreator) CreateExpensesAnalyticButtons() tgbotapi.ReplyKey
 func (t TelegramButtonCreator) CreateSuperAnalyticButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🧮 Статистика"),
-			tgbotapi.NewKeyboardButton("🤑 Cальдо"),
+			tgbotapi.NewKeyboardButton("⚖️ Cальдо"),
+			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("👨‍🔬 Экспертная аналитика"),
+
+			tgbotapi.NewKeyboardButton("🧮 Статистика"),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -144,7 +159,17 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("💱 Изменить валюту"),
-			tgbotapi.NewKeyboardButton("💡 Создать напоминание"),
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
+// cоздание кнопок меню настроек по строкам
+func (t TelegramButtonCreator) CreateManageMenuButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("🛎 Напоминание"),
+			tgbotapi.NewKeyboardButton("🗓 Подписки"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
@@ -156,11 +181,23 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📅 Регулярный платёж"),
-			tgbotapi.NewKeyboardButton("🎯 Накопления"),
+			tgbotapi.NewKeyboardButton("🔁 Регулярный платёж"),
+			tgbotapi.NewKeyboardButton("🔂 Разовый платеж"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🛒 Одно напоминание"),
+			tgbotapi.NewKeyboardButton("🎯 Накопления"), // хз что это!?))
+			tgbotapi.NewKeyboardButton("⬅ В меню"),
+		),
+	)
+}
+
+func (t TelegramButtonCreator) CreateFreqButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("7️⃣ Каждую неделю"),
+			tgbotapi.NewKeyboardButton("🌙 Каждый месяц"),
+		),
+		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -178,7 +215,7 @@ func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarku
 //}
 
 // рандомное сообщение для команды /hi
-func randomTextForHi() string {
+func RandomTextForHi() string {
 	hiText := [...]string{
 		"💰 Сегодня отличный день, чтобы начать экономить!", "💰 Ну что, приступим считать твои траты?",
 		"💰 Интересно, сегодня день будет ➕ или ➖ ?", "💰 Экономика должна быть экономной!",

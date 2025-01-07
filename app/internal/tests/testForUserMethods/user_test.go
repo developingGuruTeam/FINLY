@@ -3,13 +3,14 @@ package testForUserMethods
 import (
 	"cachManagerApp/app/db/models"
 	"cachManagerApp/app/internal/tests/mocks"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"testing"
 )
 
 var Update = tgbotapi.Update{

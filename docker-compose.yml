@@ -35,15 +35,6 @@ services:
     networks:
       - cash_network
 
-  redis:
-    image: redis:latest
-    container_name: redis_container
-    ports:
-      - "6379:6379" # Пробрасываем порт Redis
-    restart: unless-stopped
-    networks:
-      - cash_network
-
 volumes:
   postgres_data:
 

@@ -3,17 +3,19 @@ package database
 import (
 	"cachManagerApp/app/db/models"
 	"fmt"
+	"log/slog"
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
-	"os"
 )
 
 var DB *gorm.DB
 
-func ConnectionDB() {
+func ConnectionDB(log *slog.Logger) {
 
-	log.Printf("DB_HOST=%s, DB_USER=%s,DB_PASSWORD=%s, DB_NAME=%s, DB_PORT=%s\n",
+	fmt.Printf(
+		"DB_HOST=%s, DB_USER=%s,DB_PASSWORD=%s, DB_NAME=%s, DB_PORT=%s",
 		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_PORT"))
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -26,36 +28,31 @@ func ConnectionDB() {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Не удалось подключиться к БД", err)
+		log.Error("Не удалось подключиться к БД", slog.Any("error", err))
 		return
 	}
 
 	DB = db
-	log.Println("Подключение к БД успешно")
+	log.Info("Подключение к БД успешно")
 
 	err = db.AutoMigrate(&models.Users{}, &models.Transactions{})
 	if err != nil {
-		log.Fatal("Ошибка при миграции", err)
+		log.Error("Ошибка при миграции", slog.Any("error", err))
 		return
 	}
 
-	fmt.Println("Миграции успешно выполнены")
+	err = db.AutoMigrate(&models.Reminder{})
+	if err != nil {
+		log.Error("Ошибка при миграции", slog.Any("error", err))
+		return
+	}
 
-	// Очистка таблиц
-	/*
-		// Очистка операций
-		err = db.Exec("DELETE FROM transactions").Error
-		if err != nil {
-			log.Fatalf("Ошибка очистки данных в таблице транзакций: %v", err)
-		}
-		log.Println("Данные из таблицы транзакций успешно удалены!")
+	log.Info("Миграции успешно выполнены")
 
-		// Очистка таблицы пользователей
-		err = db.Exec("DELETE FROM users").Error
-		if err != nil {
-			log.Fatalf("Ошибка очистки данных в таблице пользователей: %v", err)
-		}
-		log.Println("Данные из таблицы пользователей успешно удалены!")
+	// Очистка операций
+	//db.Exec("DELETE FROM transactions")
 
-	*/
+	// Очистка таблицы пользователей
+	//db.Exec("DELETE FROM users")
+
 }

@@ -2,11 +2,11 @@ package methodsForIncomeAnalys
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/pkg/logger"
 	"fmt"
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
-	"time"
 )
 
 // хендлер доходов
@@ -15,8 +15,6 @@ type IncomeAnalyticHandlers interface {
 	IncomeWeekAnalytic(update tgbotapi.Update) (map[string]uint64, error)
 	IncomeMonthAnalytic(update tgbotapi.Update) (map[string]uint64, error)
 }
-
-var log = logger.GetLogger()
 
 type AnalyticHandler struct {
 	DB *gorm.DB

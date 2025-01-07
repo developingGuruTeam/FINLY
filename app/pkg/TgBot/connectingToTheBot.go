@@ -1,58 +1,57 @@
 package TgBot
 
 import (
-	"cachManagerApp/app/internal/methodsForUser"
-	"cachManagerApp/app/pkg/logger"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"cachManagerApp/app/internal/notion"
+	"cachManagerApp/app/pkg/ButtonsCreate"
+	"log/slog"
 	"os"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // подключение к тг и обработка обновлений
-func ConnectToTgBot() (*tgbotapi.BotAPI, error) {
-	log := logger.GetLogger()
+func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
-		log.Fatalf("Failed to connect to Telegram bot API: %v", err)
+		log.Error("Failed to connect to Telegram bot API:", slog.Any("error", err))
 	}
 	log.Info("Successfully connected to Telegram bot API!")
 
-	bot.Debug = true
+	bot.Debug = false
 
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 15
 
 	updates := bot.GetUpdatesChan(updateConfig)
 
+	// старт работы уведомлений
+	notion.StartReminderServiceWithCron(bot, log)
+
 	// старт всех кнопок
-	buttonCreator := TelegramButtonCreator{}
+	buttonCreator := ButtonsCreate.TelegramButtonCreator{}
 
 	for update := range updates {
 		if update.Message != nil {
 			switch update.Message.Text {
 			case "/start":
 				// планировщик отложенных уведомлений запускаем для пользователя вместе со стартом бота
-				ScheduleNotifications(bot, update.Message.Chat.ID, update.Message.From.UserName)
+				ScheduleNotifications(bot, update.Message.Chat.ID, update.Message.From.UserName, log)
 
-				// высылаем только при старте /start
-				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
-				userHandler := &methodsForUser.UserMethod{}
-				if err := userHandler.PostUser(update); err != nil {
-					log.Printf("Ошибка при добавлении пользователя: %v", err)
-				} else {
-					log.Println("Пользователь успешно добавлен.")
-				}
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать! 👋\nЯ — ваш финансовый помощник.\nБлагодаря мне у вас есть возможность взять свои денежные средства под контроль.\nВперёд к финансовому успеху!\nВыберите действие в меню ✏\n\nБазовые команды бота:\n/info - Информация о боте\n/help - Помощь в использовании\n/hi - Мотивационное сообщение")
-				msg.ReplyMarkup = mainMenuKeyboard
-				if _, err := bot.Send(msg); err != nil {
-					log.Printf("Failed to send message with main menu buttons: %v", err)
-				}
+				// отправляем стартовое сообщение
+				WelcomeMessage(bot, update.Message.Chat.ID, buttonCreator, log)
+
 			default:
 				// обработчик
-				PushOnButton(bot, update, buttonCreator)
+				chatID := update.Message.Chat.ID
+				if _, ok := notion.RemindersStates[chatID]; ok {
+					// Если пользователь уже в процессе, обрабатываем его ввод
+					notion.HandleReminderInput(bot, update, log)
+				} else {
+					PushOnButton(bot, update, buttonCreator, log)
+				}
 			}
 		}
 	}
-
 	return bot, nil
 }
