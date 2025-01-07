@@ -14,7 +14,7 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
-		log.Error("Failed to connect to Telegram bot API: %v", err)
+		log.Error("Failed to connect to Telegram bot API:", slog.Any("error", err))
 	}
 	log.Info("Successfully connected to Telegram bot API!")
 

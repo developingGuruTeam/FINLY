@@ -22,7 +22,7 @@ func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string,
 
 	// Отправляем сообщение пользователю
 	if _, err := bot.Send(msg); err != nil {
-		log.Error("Ошибка отправки сообщения: %v", err)
+		log.Error("Ошибка отправки сообщения:", slog.Any("error", err))
 	}
 }
 
