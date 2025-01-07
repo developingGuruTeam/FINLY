@@ -41,7 +41,7 @@ _Дополнительная информация:_
 
 	// Отправляем сообщение пользователю
 	if _, err := bot.Send(msg); err != nil {
-		log.Info("Failed to send about bot message: ", log.With("error", err))
+		log.Info("Failed to send about bot message: ", slog.Any("error", err))
 	}
 }
 
@@ -57,6 +57,6 @@ func WelcomeMessage(bot *tgbotapi.BotAPI, chatID int64, buttonCreator ButtonsCre
 
 	// отправляем сообщение
 	if _, err := bot.Send(msg); err != nil {
-		log.Error("Failed to send message with main menu buttons: %v", log.With("error", err))
+		log.Error("Failed to send message with main menu buttons:", slog.Any("error", err))
 	}
 }

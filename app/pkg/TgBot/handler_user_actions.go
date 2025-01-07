@@ -45,7 +45,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		// обновляем имя пользователя
 		user := methodsForUser.UserMethod{}
 		if err := user.UpdateUserName(update); err != nil {
-			log.Error("Ошибка обновления имени пользователя", log.With("error", err))
+			log.Error("Ошибка обновления имени пользователя", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении имени.")
 			bot.Send(msg)
 			return
@@ -73,7 +73,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		// обновляем валюту пользователя
 		user := methodsForUser.UserMethod{}
 		if err := user.UpdateUserCurrency(update); err != nil {
-			log.Error("Ошибка обновления валюты", log.With("error", err))
+			log.Error("Ошибка обновления валюты", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении валюты")
 			bot.Send(msg)
 			return
