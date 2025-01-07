@@ -1,4 +1,4 @@
-package methodsForSummary
+package methods_for_summary
 
 import (
 	"cachManagerApp/app/db/models"

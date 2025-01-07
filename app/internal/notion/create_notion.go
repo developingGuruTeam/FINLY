@@ -34,7 +34,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 	case reminder.Frequency == "":
 		// получаем частоту платежа
 		if update.Message.Text == "⬅ В меню" {
-			menuMain := ButtonsCreate.TelegramButtonCreator{}
+			menuMain := buttons_create.TelegramButtonCreator{}
 			back := menuMain.CreateMainMenuButtons()
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы вернулись в главное меню")
 			msg.ReplyMarkup = back
@@ -114,7 +114,7 @@ func HandleReminderInput(bot *tgbotapi.BotAPI, update tgbotapi.Update, log *slog
 			return
 		}
 
-		menuMain := ButtonsCreate.TelegramButtonCreator{}
+		menuMain := buttons_create.TelegramButtonCreator{}
 		back := menuMain.CreateMainMenuButtons()
 		msg := tgbotapi.NewMessage(chatID, "Напоминание успешно создано 😊")
 

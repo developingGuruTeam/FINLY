@@ -1,4 +1,4 @@
-package testForAnalytic
+package test_for_analytic
 
 import (
 	"cachManagerApp/app/db/models"

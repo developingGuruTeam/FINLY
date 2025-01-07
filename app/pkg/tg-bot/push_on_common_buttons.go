@@ -1,4 +1,4 @@
-package TgBot
+package tg_bot
 
 import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
@@ -12,7 +12,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
+func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator buttons_create.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	currency, _ := CurrencyFromChatID(chatID)
 
@@ -82,7 +82,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 	case "/hi":
 		// оставил одну инлайн команду 1 - для того что показать есть такой функционал, 2 - просто в прикол пообщаться пользователю
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi())
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, buttons_create.RandomTextForHi())
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}

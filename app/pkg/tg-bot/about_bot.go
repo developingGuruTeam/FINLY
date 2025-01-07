@@ -1,4 +1,4 @@
-package TgBot
+package tg_bot
 
 import (
 	"cachManagerApp/app/pkg/ButtonsCreate"
@@ -44,7 +44,7 @@ _© 2024-2025 г. Все права защищены._
 	}
 }
 
-func WelcomeMessage(bot *tgbotapi.BotAPI, chatID int64, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
+func WelcomeMessage(bot *tgbotapi.BotAPI, chatID int64, buttonCreator buttons_create.TelegramButtonCreator, log *slog.Logger) {
 	// создаем главное меню
 	mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
 

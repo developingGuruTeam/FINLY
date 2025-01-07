@@ -1,4 +1,4 @@
-package methodsForUser
+package methods_for_user
 
 import (
 	"cachManagerApp/app/db/models"

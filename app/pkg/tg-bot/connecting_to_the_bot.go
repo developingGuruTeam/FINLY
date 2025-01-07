@@ -1,4 +1,4 @@
-package TgBot
+package tg_bot
 
 import (
 	"cachManagerApp/app/internal/methodsForUser"
@@ -30,14 +30,14 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 	notion.StartReminderServiceWithCron(bot, log)
 
 	// старт всех кнопок
-	buttonCreator := ButtonsCreate.TelegramButtonCreator{}
+	buttonCreator := buttons_create.TelegramButtonCreator{}
 
 	for update := range updates {
 		if update.Message != nil {
 			switch update.Message.Text {
 			case "/start":
 
-				userHandler := &methodsForUser.UserMethod{}
+				userHandler := &methods_for_user.UserMethod{}
 				if err := userHandler.PostUser(update, log); err != nil {
 					log.Info("Ошибка при добавлении пользователя:", slog.Any("error", err))
 				} else {

@@ -1,4 +1,4 @@
-package methodsForExpenses
+package methods_for_expenses
 
 import (
 	"cachManagerApp/app/db/models"

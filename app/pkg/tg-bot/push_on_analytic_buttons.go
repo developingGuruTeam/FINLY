@@ -1,4 +1,4 @@
-package TgBot
+package tg_bot
 
 import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
@@ -9,7 +9,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, command string, log *slog.Logger) {
+func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator buttons_create.TelegramButtonCreator, command string, log *slog.Logger) {
 	currency, _ := CurrencyFromChatID(update.Message.Chat.ID)
 
 	switch command {
