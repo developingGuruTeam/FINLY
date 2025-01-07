@@ -7,57 +7,16 @@ import (
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/database"
 	"fmt"
-
 	"log/slog"
-	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-
-type TransactionResponse struct {
-	Action string `json:"action"`
-}
-
-type UserResponse struct {
-	Action string `json:"action"`
-}
-
-var (
-	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
-	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
-	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
-
-)
-
-// обработка нажатий на кнопки (команда приходит сюда)
-func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
-	if update.Message != nil {
-		// чат ID наполняется
-		chatID := update.Message.Chat.ID
-		mu.Lock()
-		val2, ok2 := transactionStates[chatID]
-		val, ok := userStates[chatID]
-		mu.Unlock()
-
-		if ok2 && val2.Action != "" {
-			handleTransactionAction(bot, update, val2, log)
-			return
-		}
-
-		// если в ней лежит ключ, то переходит к действию, если нет, то ждет отклика
-		if ok && val.Action != "" {
-			handleUserAction(bot, update, val, log)
-			return
-		}
-		handleButtonPress(bot, update, buttonCreator, log)
-	}
-}
 
 func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	currency, _ := CurrencyFromChatID(chatID)
 
-	handled := false
+	handled := false // флажок
 	switch update.Message.Text {
 
 	// ОПИСАНИЕ КНОПОК ГЛАВНОГО МЕНЮ
@@ -98,10 +57,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "ℹ️ Информация":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📍 Бот предназначен для:\n ▪ Ведения учета доходов и расходов\n ▪ Создания отчетов по различным критериям\n ▪ Экономического анализа\n ▪ Контроля и управления финансами")
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send /info message:", slog.Any("error", err))
-		}
+		AboutBot(bot, update.Message.Chat.ID, log)
 		handled = true
 
 	case "⚙️ Настройки":
@@ -123,9 +79,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	// ОПИСАНИЕ ИНЛАЙН КОММАНД
+
 	case "/hi":
-		// оставил одну инлайн команду, просто в прикол пообщаться пользователю
-		// получить слова поддержки, ну и вообще что у нас есть такой функционал
+		// оставил одну инлайн команду 1 - для того что показать есть такой функционал, 2 - просто в прикол пообщаться пользователю
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi())
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
@@ -133,8 +89,13 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	// кнопки меню НАСТРОЙКИ
+
 	case "🎭 Изменить имя":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите Ваше новое имя")
+		clearName, _ := ClearUserNameFromChatID(chatID)
+		nameText := fmt.Sprintf("Текущее имя : *%s*\n\nВведите новое имя\n_(до 32 символов)_", clearName)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, nameText)
+		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -144,7 +105,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💱 Изменить валюту":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите валюту")
+		currencyText := fmt.Sprintf("Текущая валюта: *%s*\n\nВведите новую валюту\n_(3 символа)_\n", currency)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, currencyText)
+		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -161,18 +125,12 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "🗓 Подписки":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
-		msg.ParseMode = "Markdown"
-		if _, err := bot.Send(msg); err != nil {
-			log.Error("Failed to send /info message:", slog.Any("error", err))
-		}
-		handled = true
+		// кнопка меню ПРИХОД
 
-		// приходы
 	case "💳 Заработная плата":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму заработной платы*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму заработной платы\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -182,8 +140,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🌟 Побочный доход":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дополнительного дохода*\n(подработка, фриланс).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дополнительного дохода\n_(подработка, фриланс)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -193,8 +152,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💼 Доход от бизнеса":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дохода от бизнеса*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от бизнеса\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -204,8 +164,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🏦 Доход от инвестиций":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму дохода от инвестиций*\n(проценты по вкладам, дивиденды).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму дохода от инвестиций\n_(проценты по вкладам, дивиденды)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -215,8 +176,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👮‍ Гос. выплаты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму государственных выплат*\n(пенсии, пособия).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму государственных выплат\n_(пенсии, пособия)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -226,8 +188,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🏠 Продажа имущества":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму продажи имущества*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму от реализации имущества\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -237,8 +200,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "⚪️ Прочие доходы":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму прочих поступлений*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих поступлений\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -246,10 +210,13 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		transactionStates[chatID] = TransactionResponse{Action: "other_income"}
 		mu.Unlock()
 		handled = true
-		// расходные операции
+
+		// кнопка меню РАСХОД
+
 	case "🛍 Бытовые траты":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму базовых трат*\n(еда, напитки, проезд).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму бытовых расходов\n_(еда, напитки, проезд)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -259,8 +226,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "♻️ Регулярные платежи":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму регулярного платежа*\n(кредиты, налоги, аренда,\nкоммунальные платежи).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму регулярного платежа\n_(кредиты, налоги, аренда,\nкоммунальные платежи)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -270,8 +238,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👘 Одежда":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму трат на обновление гардероба*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму трат на обновление гардероба\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -281,8 +250,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "💪 Здоровье":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите расходы на поддержание здоровья*\n(аптеки, обследования, визиты к врачам).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите расходы на поддержание здоровья\n_(аптеки, обследования, визиты к врачам)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -292,8 +262,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "👨‍🏫 Досуг и образование":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму расхода*\n(книги, подписки, курсы, хобби,\n музеи, кино, рестораны).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму расхода\n_(книги, подписки, курсы, хобби,\n музеи, кино, рестораны)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -303,8 +274,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "🏦 Инвестиции":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму затраченную на инвестиции*\n(вклады, акции, покупка автомобилей,\nнедвижимости, предметов роcкоши).\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму затраченную на инвестиции\n_(вклады, акции, покупка автомобилей,\nнедвижимости, предметов роcкоши)_\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -314,8 +286,9 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "⚪️ Прочие расходы":
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "*Введите сумму прочих расходов*\n\nЧерез запятую можно добавить комментарий")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Введите сумму прочих расходов\n")
 		msg.ParseMode = "Markdown"
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true) // скрываем кнопки от юзера
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -324,7 +297,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		mu.Unlock()
 		handled = true
 
-	// ОТЧЕТ ДОХОДЫ
+	// кнопка меню ОТЧЕТЫ (доходы)
+
 	case "💵 Отчет по доходам":
 		incomes := buttonCreator.CreateIncomeAnalyticButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период отчета")
@@ -426,7 +400,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 		handled = true
 
-	// ОТЧЕТ ПО РАСХОДАМ
+	// кнопка меню ОТЧЕТЫ (расходы)
+
 	case "💸 Отчет по расходам":
 		incomes := buttonCreator.CreateExpensesAnalyticButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите период отчета")
@@ -517,7 +492,23 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		handled = true
-	// аналитика
+
+	// кнопка меню УПРАВЛЕНИЕ
+
+	case "🛎 Напоминание":
+		command := "🛎 Напоминание"
+		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
+		handled = true
+
+	case "🗓 Подписки":
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
+		msg.ParseMode = "Markdown"
+		if _, err := bot.Send(msg); err != nil {
+			log.Info("Failed to send /info message: ", slog.Any("error", err))
+		}
+		handled = true
+
+	// кнопки меню внутри Отчетов
 	case "🧑‍💻 Аналитика":
 		analyse := buttonCreator.CreateSuperAnalyticButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите категорию аналитики")
@@ -525,11 +516,6 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send main menu:", slog.Any("error", err))
 		}
-		handled = true
-
-	case "💡 Напоминание":
-		command := "💡 Напоминание"
-		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 
 	case "💲Анализ за неделю":
@@ -554,8 +540,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 		handled = true
 
-	case "🤑 Cальдо":
-		command := "сальдо"
+	case "⚖️ Cальдо":
+		command := "⚖️ Cальдо"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 
@@ -577,8 +563,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "📅 Регулярный платёж":
-		command := "📅 Регулярный платёж"
+	// кнопки меню внутри Управления - Напоминания
+
+	case "🔁 Регулярный платёж":
+		command := "🔁 Регулярный платёж"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 
@@ -590,7 +578,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "🛒 Одно напоминание":
+	// предлагаю сделать напоминание настраиваемое прям когда человек хочет) одноразовое хоть через 3 дня хоть через 333 дня
+	case "🔂 Разовый платеж":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {

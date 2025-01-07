@@ -47,23 +47,31 @@ func (u *UserMethod) PostUser(update tgbotapi.Update, log *slog.Logger) error {
 
 func (u *UserMethod) UpdateUserName(update tgbotapi.Update) error {
 	newUserName := update.Message.Text
+	telegramID := uint64(update.Message.Chat.ID)
 
-	res := database.DB.Model(&models.Users{}).
-		Where("telegram_id = ?", uint64(update.Message.Chat.ID)).
+	// проверяем текущее имя
+	var currentUser models.Users
+	res := database.DB.First(&currentUser, "telegram_id = ?", telegramID)
+	if res.Error != nil {
+		log.Printf("Ошибка поиска пользователя: %v", res.Error)
+		return res.Error
+	}
+
+	// обновляем имя
+	res = database.DB.Model(&models.Users{}).
+		Where("telegram_id = ?", telegramID).
 		Update("name", newUserName)
 	if res.Error != nil {
 		log.Printf("Ошибка обновления имени пользователя: %v", res.Error)
 		return res.Error
 	}
 
-	// Проверяем, обновлена ли хотя бы одна строка
 	if res.RowsAffected == 0 {
 		log.Println("Не найден пользователь с указанным telegram_id.")
 		return errors.New("пользователь не найден")
 	}
 
-	log.Printf("Имя пользователя с Telegram ID %d успешно обновлено на '%s'.", update.Message.Chat.ID, newUserName)
-
+	log.Printf("Имя пользователя с Telegram ID %d успешно обновлено на '%s'.", telegramID, newUserName)
 	return nil
 }
 
@@ -72,9 +80,6 @@ func (u *UserMethod) UpdateUserCurrency(update tgbotapi.Update) error {
 
 	// делаем тут валюту из трех букв и точку на конце
 	runes := []rune(newCurrency)
-	if len(runes) > 3 {
-		runes = runes[:3]
-	}
 	newCurrency = fmt.Sprintf("%s.", string(runes))
 
 	res := database.DB.Model(&models.Users{}).
