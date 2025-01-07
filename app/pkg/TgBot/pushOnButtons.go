@@ -15,6 +15,10 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+type SumResponce struct {
+	Amount int64 `json:"amount"`
+}
+
 type TransactionResponse struct {
 	Action string `json:"action"`
 }
@@ -24,6 +28,7 @@ type UserResponse struct {
 }
 
 var (
+	sumStates         = make(map[int64]SumResponce)         // мапа для хранения состояния добавления суммы
 	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
 	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
