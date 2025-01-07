@@ -3,7 +3,6 @@ package methodsForIncomeAnalys
 import (
 	"cachManagerApp/app/db/models"
 	"fmt"
-	"math"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -117,38 +116,14 @@ func GenerateWeeklyIncomeReport(categorySummary map[string]uint64, currency stri
 		totalIncome += value
 	}
 
-	// Рассчитываем проценты
-	totalPercentage := 0
-	percentages := make(map[string]int)
-	var maxCategory string
-	maxValue := 0
-
-	for category, value := range categorySummary {
-		percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100))
-		percentages[category] = percentage
-		totalPercentage += percentage
-
-		// Сохраняем категорию с максимальным значением
-		if percentage > maxValue {
-			maxValue = percentage
-			maxCategory = category
-		}
-	}
-
-	// Корректируем разницу процентов, если сумма не равна 100
-	if totalPercentage != 100 {
-		difference := 100 - totalPercentage
-		percentages[maxCategory] += difference
-	}
-
-	// Формируем текстовый отчет
 	report := "📊 *Доходы за неделю*\n\n"
+
 	for category, value := range categorySummary {
-		percentage := percentages[category]
+		percentage := (float64(value) / float64(totalIncome)) * 100
 		if emoji, exists := categoryDetails[category]; exists {
-			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, percentage)
+			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, int(percentage))
 		} else {
-			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, percentage)
+			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, int(percentage))
 		}
 	}
 
@@ -208,41 +183,18 @@ func GenerateMonthlyIncomeReport(categorySummary map[string]uint64, currency str
 		totalIncome += value
 	}
 
-	// Рассчитываем проценты
-	totalPercentage := 0
-	percentages := make(map[string]int)
-	var maxCategory string
-	maxValue := 0
-
-	for category, value := range categorySummary {
-		percentage := int(math.Round((float64(value) / float64(totalIncome)) * 100))
-		percentages[category] = percentage
-		totalPercentage += percentage
-
-		// Сохраняем категорию с максимальным значением
-		if percentage > maxValue {
-			maxValue = percentage
-			maxCategory = category
-		}
-	}
-
-	// Корректируем разницу процентов, если сумма не равна 100
-	if totalPercentage != 100 {
-		difference := 100 - totalPercentage
-		percentages[maxCategory] += difference
-	}
-
-	// Формируем текстовый отчет
 	report := "📊 *Доходы за месяц*\n\n"
+
 	for category, value := range categorySummary {
-		percentage := percentages[category]
+		percentage := (float64(value) / float64(totalIncome)) * 100
 		if emoji, exists := categoryDetails[category]; exists {
-			report += fmt.Sprintf("%s %s: %d %s (%d%%)\n", emoji, category, value, currency, percentage)
+			report += fmt.Sprintf("%s %s: %d (%d%%)\n", emoji, category, value, int(percentage))
 		} else {
-			report += fmt.Sprintf("%s: %d %s (%d%%)\n", category, value, currency, percentage)
+			report += fmt.Sprintf("%s: %d (%d%%)\n", category, value, int(percentage))
 		}
 	}
 
 	report += fmt.Sprintf("\n💸 Общий доход за месяц: *%d* %s", totalIncome, currency)
+
 	return report
 }

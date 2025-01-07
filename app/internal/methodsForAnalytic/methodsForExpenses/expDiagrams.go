@@ -28,12 +28,12 @@ func GenerateWeeklyExpensePieChartURL(categorySummary map[string]uint64) (string
 		"Прочее":              "#D3D3D3", // серый
 	}
 
-	// считаем общий расход
+	// Общий расход
 	for _, value := range categorySummary {
 		totalExpense += value
 	}
 
-	// преобразуем суммы в проценты
+	// Преобразуем суммы в проценты
 	for category, value := range categorySummary {
 		if value > 0 {
 			labels = append(labels, category)
@@ -42,7 +42,7 @@ func GenerateWeeklyExpensePieChartURL(categorySummary map[string]uint64) (string
 		}
 	}
 
-	// присваиваем цвета
+	// Присваиваем цвета
 	for _, category := range labels {
 		if color, exists := categoryColors[category]; exists {
 			colors = append(colors, color)
@@ -50,7 +50,7 @@ func GenerateWeeklyExpensePieChartURL(categorySummary map[string]uint64) (string
 			colors = append(colors, "#CCCCCC") // цвет по умолчанию
 		}
 	}
-	// заполнение для квикчарта
+
 	chartData := map[string]interface{}{
 		"type": "doughnut", // Тип графика
 		"data": map[string]interface{}{
@@ -71,13 +71,13 @@ func GenerateWeeklyExpensePieChartURL(categorySummary map[string]uint64) (string
 		},
 	}
 
-	// преобразуем в JSON
+	// Преобразуем в JSON
 	jsonData, err := json.Marshal(chartData)
 	if err != nil {
 		return "", fmt.Errorf("Ошибка при создании данных для диаграммы: %v", err)
 	}
 
-	// составляем URL
+	// Составляем URL
 	baseURL := "https://quickchart.io/chart"
 	params := url.Values{}
 	params.Add("c", string(jsonData))
