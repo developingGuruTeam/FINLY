@@ -23,7 +23,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 	case "change_name":
 		newName := strings.TrimSpace(update.Message.Text) // убираем пробелы по обе стороны, если есть
 		if newName == "" {
-			newName = "Пользователь" // поправить на никнейм тг, если есть
+			newName = "Пользователь"
 		}
 
 		// проверка нового имени: только буквы и длина от 1 до 32 символов
@@ -50,7 +50,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			return
 		}
 
-		msgDone := fmt.Sprintf("✅ Ваше имя успешно изменено на %s.", newName)
+		msgDone := fmt.Sprintf("✅ Ваше имя успешно изменено на *%s*.", newName)
 		returnToMainMenu(bot, chatID, buttonCreator, msgDone)
 
 	case "change_currency":
@@ -78,7 +78,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			return
 		}
 
-		msgDone := fmt.Sprintf("✅ Ваша валюта изменена на %s.", newCurrency)
+		msgDone := fmt.Sprintf("✅ Ваша валюта изменена на *%s*.", newCurrency)
 		returnToMainMenu(bot, chatID, buttonCreator, msgDone)
 	}
 
@@ -94,6 +94,7 @@ func returnToMainMenu(bot *tgbotapi.BotAPI, chatID int64, buttonCreator ButtonsC
 
 	// отправляем пустое сообщение с кнопками
 	menuMsg := tgbotapi.NewMessage(chatID, msg)
+	menuMsg.ParseMode = "Markdown"
 	menuMsg.ReplyMarkup = mainMenu // показываем кнопки
 	bot.Send(menuMsg)
 

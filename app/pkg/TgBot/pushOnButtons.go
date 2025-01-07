@@ -4,16 +4,21 @@ import (
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
 	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
+	"cachManagerApp/app/internal/methodsForTransaction"
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"cachManagerApp/database"
 	"fmt"
-	"strconv"
-
 	"log/slog"
+	"strconv"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+type CommentResponse struct {
+	Category string `json:"category"`
+	Amount   int64  `json:"amount"`
+}
 
 type SumResponce struct {
 	Amount int64 `json:"amount"`
@@ -28,7 +33,7 @@ type UserResponse struct {
 }
 
 var (
-	sumStates         = make(map[int64]SumResponce)         // мапа для хранения состояния добавления суммы
+	commentStates     = make(map[int64]CommentResponse)     // мапа для хранения состояния комментариев
 	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
 	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
@@ -38,40 +43,88 @@ var (
 // обработка нажатий на кнопки (команда приходит сюда)
 func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	if update.Message != nil {
-		// чат ID наполняется
 		chatID := update.Message.Chat.ID
 
-		// Проверяем состояние транзакции
 		mu.Lock()
 		val2, ok2 := transactionStates[chatID]
+		val3, ok3 := commentStates[chatID]
 		val, ok := userStates[chatID]
 		mu.Unlock()
 
-		// если активна транзакция, ждем только число от пользователя
-		if ok2 && val2.Action != "" {
-			if _, err := strconv.Atoi(update.Message.Text); err != nil {
-				// Если введено не число, отправляем сообщение об ошибке
-				msg := tgbotapi.NewMessage(chatID, "🚫 Введите сумму (положительное целое число)")
-				_, _ = bot.Send(msg)
+		// если активен режим ожидания комментария
+		if ok3 {
+			if update.Message.Text == "⤵️ Пропустить" {
+				// сохраняем транзакцию без коммента
+				transaction := methodsForTransaction.TransactionsMethod{}
+				if err := transaction.PostTransactionWithComment(update, val3.Category, val3.Amount, "", log); err != nil {
+					log.Info("Failed to save transaction without comment: %s", log.With("error", err))
+					msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+					bot.Send(msg)
+					return
+				}
+
+				doneMsg := "✅ Сумма сохранена."
+				returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
+				mu.Lock()
+				delete(commentStates, chatID)
+				mu.Unlock()
 				return
 			}
 
-			// если введено корректное число, обрабатываем транзакцию
-			handleTransactionAction(bot, update, val2, buttonCreator, log)
+			// сохраняем транзакцию с коммента
+			comment := update.Message.Text
+			transaction := methodsForTransaction.TransactionsMethod{}
+			if err := transaction.PostTransactionWithComment(update, val3.Category, val3.Amount, comment, log); err != nil {
+				log.Info("Failed to save transaction with comment: %s", log.With("error", err))
+				msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
+				bot.Send(msg)
+				return
+			}
+
+			doneMsg := "✅ Сумма сохранена.\n📝 Комментарий добавлен"
+			returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
+			mu.Lock()
+			delete(commentStates, chatID)
+			mu.Unlock()
 			return
 		}
 
-		// если в ней лежит ключ, то переходит к действию, если нет, то ждет отклика
+		// если активна транзакция, но комментарий еще не введен
+		if ok2 && val2.Action != "" {
+			// проверяем, является ли введенное значение числом
+			sum, err := strconv.Atoi(update.Message.Text)
+			if err != nil || sum <= 0 {
+				msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
+				bot.Send(msg)
+				return
+			}
+
+			// сохраняем сумму и категорию в состояние комментария
+			mu.Lock()
+			commentStates[chatID] = CommentResponse{
+				Category: val2.Action,
+				Amount:   int64(sum),
+			}
+			delete(transactionStates, chatID) // удаляем состояние транзакции, чтобы дальше запросить коммент
+			mu.Unlock()
+
+			msg := tgbotapi.NewMessage(chatID, "Добавьте комментарий к сумме или нажмите ⤵️*Пропустить*")
+			msg.ParseMode = "Markdown"
+			msg.ReplyMarkup = buttonCreator.CreateCommentButtons() // Кнопка 'Пропустить'
+			bot.Send(msg)
+			return
+		}
+
+		// если активен режим смены имени или валюты
 		if ok && val.Action != "" {
 			handleUserAction(bot, update, val, buttonCreator, log)
 			return
 		}
 
-		// если ни одно из состояний не активно, обрабатываем нажатие кнопки
+		// обработка нажатия
 		handleButtonPress(bot, update, buttonCreator, log)
 	}
 }
-
 func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	currency, _ := CurrencyFromChatID(chatID)
@@ -144,6 +197,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	// ОПИСАНИЕ ИНЛАЙН КОММАНД
+
 	case "/hi":
 		// оставил одну инлайн команду, просто в прикол пообщаться пользователю
 		// получить слова поддержки, ну и вообще что у нас есть такой функционал

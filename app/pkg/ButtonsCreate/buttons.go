@@ -33,6 +33,14 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 	)
 }
 
+func (b *TelegramButtonCreator) CreateCommentButtons() tgbotapi.ReplyKeyboardMarkup {
+	return tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("⤵️ Пропустить"),
+		),
+	)
+}
+
 func (t TelegramButtonCreator) CreateIncomeMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
