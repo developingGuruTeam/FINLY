@@ -1,7 +1,6 @@
 package TgBot
 
 import (
-	"cachManagerApp/app/internal/methodsForUser"
 	"cachManagerApp/app/internal/notion"
 	"cachManagerApp/app/pkg/ButtonsCreate"
 	"log/slog"
@@ -39,19 +38,9 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 				// планировщик отложенных уведомлений запускаем для пользователя вместе со стартом бота
 				ScheduleNotifications(bot, update.Message.Chat.ID, update.Message.From.UserName, log)
 
-				// высылаем только при старте /start
-				mainMenuKeyboard := buttonCreator.CreateMainMenuButtons()
-				userHandler := &methodsForUser.UserMethod{}
-				if err := userHandler.PostUser(update, log); err != nil {
-					log.Info("Ошибка при добавлении пользователя: %v", log.With("error", err))
-				} else {
-					log.Info("Пользователь успешно добавлен.", log.With("telegram_id", update.Message.Chat.ID))
-				}
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Добро пожаловать! 👋\nЯ — ваш финансовый помощник.\nБлагодаря мне у вас есть возможность взять свои денежные средства под контроль.\nВперёд к финансовому успеху!\nВыберите действие в меню ✏\nБазовые команды бота:\n/help - Помощь в использовании\n/hi - Мотивационное сообщение")
-				msg.ReplyMarkup = mainMenuKeyboard
-				if _, err := bot.Send(msg); err != nil {
-					log.Error("Failed to send message with main menu buttons: %v", log.With("error", err))
-				}
+				// отправляем стартовое сообщение
+				WelcomeMessage(bot, update.Message.Chat.ID, buttonCreator, log)
+
 			default:
 				// обработчик
 				chatID := update.Message.Chat.ID

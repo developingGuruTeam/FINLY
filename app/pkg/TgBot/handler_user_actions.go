@@ -26,7 +26,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			newName = "Пользователь"
 		}
 
-		// проверка нового имени: только буквы и длина от 1 до 32 символов
+		// проверка нового имени (только буквы)
 		var validName bool = true
 		for _, symbol := range newName {
 			if !unicode.IsLetter(symbol) && symbol != ' ' { // имя только из букв и пробелов
@@ -35,6 +35,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			}
 		}
 
+		// проверка длины + буквы
 		if utf8.RuneCountInString(newName) == 0 || utf8.RuneCountInString(newName) > 32 || !validName {
 			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректное имя. Имя должно содержать только буквы и быть не более 32 символов.")
 			bot.Send(msg)
@@ -63,8 +64,8 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 				break
 			}
 		}
-		// проверка валюты на длину
-		if utf8.RuneCountInString(newCurrency) != 3 || okCurrency != true {
+		// проверка длины + буквы
+		if utf8.RuneCountInString(newCurrency) != 3 || !okCurrency {
 			msg := tgbotapi.NewMessage(chatID, "🚫 Некорректный формат валюты. Валюта должна содержать только буквы и быть не более 3 символов.")
 			bot.Send(msg)
 			return
@@ -112,7 +113,7 @@ func ClearUserNameFromChatID(chatID int64) (string, error) {
 	return user.Name, nil
 }
 
-// получение валюты из бд
+// получение валюты из БД
 func CurrencyFromChatID(chatID int64) (string, error) {
 	var user models.Users
 	result := database.DB.Where("telegram_id = ?", chatID).First(&user)

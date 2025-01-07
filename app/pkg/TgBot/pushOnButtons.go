@@ -20,10 +20,6 @@ type CommentResponse struct {
 	Amount   int64  `json:"amount"`
 }
 
-type SumResponce struct {
-	Amount int64 `json:"amount"`
-}
-
 type TransactionResponse struct {
 	Action string `json:"action"`
 }
@@ -33,11 +29,10 @@ type UserResponse struct {
 }
 
 var (
+	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	commentStates     = make(map[int64]CommentResponse)     // мапа для хранения состояния комментариев
 	userStates        = make(map[int64]UserResponse)        // мапа для хранения состояния пользователей
-	mu                sync.Mutex                            // мьютекс для синхронизации доступа к мапе
 	transactionStates = make(map[int64]TransactionResponse) // мапа для хранения состояния транзакций
-
 )
 
 // обработка нажатий на кнопки (команда приходит сюда)
@@ -45,10 +40,11 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 	if update.Message != nil {
 		chatID := update.Message.Chat.ID
 
+		// блокируем доступ к общим мапам для синхронизации
 		mu.Lock()
-		val2, ok2 := transactionStates[chatID]
-		val3, ok3 := commentStates[chatID]
-		val, ok := userStates[chatID]
+		val, ok := userStates[chatID]          // проверяем, активен ли режим смены имени/валюты
+		val2, ok2 := transactionStates[chatID] // проверяем, есть ли состояние транзакции
+		val3, ok3 := commentStates[chatID]     // проверяем, ожидается ли ввод комментария
 		mu.Unlock()
 
 		// если активен режим ожидания комментария
@@ -64,9 +60,9 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 				}
 
 				doneMsg := "✅ Сумма сохранена."
-				returnToMainMenu(bot, chatID, buttonCreator, doneMsg)
+				returnToMainMenu(bot, chatID, buttonCreator, doneMsg) // через функцию возвращаем в главное меню
 				mu.Lock()
-				delete(commentStates, chatID)
+				delete(commentStates, chatID) // удаляем состояние ожидания комментария
 				mu.Unlock()
 				return
 			}
@@ -91,7 +87,7 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 
 		// если активна транзакция, но комментарий еще не введен
 		if ok2 && val2.Action != "" {
-			// проверяем, является ли введенное значение числом
+			// проверка на число
 			sum, err := strconv.Atoi(update.Message.Text)
 			if err != nil || sum <= 0 {
 				msg := tgbotapi.NewMessage(chatID, "🚫 Введите корректное положительное целое число.")
@@ -110,18 +106,18 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 
 			msg := tgbotapi.NewMessage(chatID, "Добавьте комментарий к сумме или нажмите ⤵️*Пропустить*")
 			msg.ParseMode = "Markdown"
-			msg.ReplyMarkup = buttonCreator.CreateCommentButtons() // Кнопка 'Пропустить'
+			msg.ReplyMarkup = buttonCreator.CreateCommentButtons() // добавляем на экран кнопку пропустить
 			bot.Send(msg)
 			return
 		}
 
 		// если активен режим смены имени или валюты
 		if ok && val.Action != "" {
-			handleUserAction(bot, update, val, buttonCreator, log)
+			handleUserAction(bot, update, val, buttonCreator, log) // запуск через отдельную функцию
 			return
 		}
 
-		// обработка нажатия
+		// запускаем обработчик нажатия на кнопки
 		handleButtonPress(bot, update, buttonCreator, log)
 	}
 }
@@ -170,12 +166,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "ℹ️ Информация":
-		// НАПИСАТЬ ДОКУМЕНТАЦИЮ И ПРАВИЛО ПОВЕДЕНИЯ, ВОЗМОЖНО ЧЕРЕЗ teletype\telegraf, можно и в самом тг, сообщение в маркдауне
-		// как вариант разбить на меню и запилить "об авторах", но это если совсем будет крутое приложение
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "📍 Бот предназначен для:\n ▪ Ведения учета доходов и расходов\n ▪ Создания отчетов по различным критериям\n ▪ Экономического анализа\n ▪ Контроля и управления финансами")
-		if _, err := bot.Send(msg); err != nil {
-			log.Info("Failed to send /info message: ", log.With("error", err))
-		}
+		AboutBot(bot, update.Message.Chat.ID, log)
 		handled = true
 
 	case "⚙️ Настройки":
@@ -199,8 +190,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	// ОПИСАНИЕ ИНЛАЙН КОММАНД
 
 	case "/hi":
-		// оставил одну инлайн команду, просто в прикол пообщаться пользователю
-		// получить слова поддержки, ну и вообще что у нас есть такой функционал
+		// оставил одну инлайн команду 1 - для того что показать есть такой функционал, 2 - просто в прикол пообщаться пользователю
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi())
 		if _, err := bot.Send(msg); err != nil {
 			log.Info("Failed to send /help message: ", log.With("error", err))
@@ -614,8 +604,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 	// кнопка меню УПРАВЛЕНИЕ
 
-	case "💡 Напоминание":
-		command := "💡 Напоминание"
+	case "🛎 Напоминание":
+		command := "🛎 Напоминание"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 
@@ -684,8 +674,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 	// кнопки меню внутри Управления - Напоминания
 
-	case "📅 Регулярный платёж":
-		command := "📅 Регулярный платёж"
+	case "🔁 Регулярный платёж":
+		command := "🔁 Регулярный платёж"
 		PushOnAnalyticButton(bot, update, buttonCreator, command, log)
 		handled = true
 
@@ -697,7 +687,8 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 		handled = true
 
-	case "🛒 Одно напоминание":
+	// предлагаю сделать напоминание настраиваемое прям когда человек хочет) одноразовое хоть через 3 дня хоть через 333 дня
+	case "🔂 Разовый платеж":
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "👷‍🔧`В разработке ...`\n")
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {

@@ -18,7 +18,6 @@ var categoryTranslations = map[string]string{
 	"state_payments":    "Гос. выплаты",
 	"property_sales":    "Продажа имущества",
 	"other_income":      "Прочие доходы",
-
 	// Расходы
 	"basic_expense":      "Бытовые траты",
 	"regular_expense":    "Регулярные платежи",
@@ -38,7 +37,6 @@ var categoryIncomes = map[string]bool{
 	"state_payments":    true,
 	"property_sales":    true,
 	"other_income":      true,
-
 	// Расходы
 	"basic_expense":      false,
 	"regular_expense":    false,
@@ -51,19 +49,13 @@ var categoryIncomes = map[string]bool{
 
 type TransactionsMethod struct{}
 
-type TransactionsHandlers interface {
-	PostIncome(update tgbotapi.Update, category string) error
-	PostExpense(update tgbotapi.Update, category string) error
-	PostTransactionWithComment(update tgbotapi.Update, category string) error
-}
-
 func (transactions *TransactionsMethod) PostTransactionWithComment(update tgbotapi.Update, category string, amount int64, comment string, log *slog.Logger) error {
 	transaction := models.Transactions{
 		TelegramID:    uint64(update.Message.Chat.ID),
 		CreatedAt:     time.Now(),
-		OperationType: categoryIncomes[category], // Используем мапу для определения доход/расход
+		OperationType: categoryIncomes[category], // здесь забираем тип приход или расход
 		Quantities:    uint64(amount),
-		Category:      categoryTranslations[category], // Переводим категорию на русский
+		Category:      categoryTranslations[category], // переводим здесь на русский
 		Description:   comment,
 	}
 

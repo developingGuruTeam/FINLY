@@ -33,6 +33,7 @@ func (t TelegramButtonCreator) CreateMainMenuButtons() tgbotapi.ReplyKeyboardMar
 	)
 }
 
+// кнопка для пропуска комментария
 func (b *TelegramButtonCreator) CreateCommentButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
@@ -167,11 +168,10 @@ func (t TelegramButtonCreator) CreateSettingsMenuButtons() tgbotapi.ReplyKeyboar
 func (t TelegramButtonCreator) CreateManageMenuButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("💡 Напоминание"),
+			tgbotapi.NewKeyboardButton("🛎 Напоминание"),
 			tgbotapi.NewKeyboardButton("🗓 Подписки"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton(""),
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)
@@ -181,11 +181,11 @@ func (t TelegramButtonCreator) CreateManageMenuButtons() tgbotapi.ReplyKeyboardM
 func (t TelegramButtonCreator) CreateNotionButtons() tgbotapi.ReplyKeyboardMarkup {
 	return tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("📅 Регулярный платёж"), // мне кажется надо переименовать "создать новое"
-			tgbotapi.NewKeyboardButton("🎯 Накопления"),        // хз что это!?
+			tgbotapi.NewKeyboardButton("🔁 Регулярный платёж"),
+			tgbotapi.NewKeyboardButton("🔂 Разовый платеж"),
 		),
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("🛒 Одно напоминание"), // хз что это!?
+			tgbotapi.NewKeyboardButton("🎯 Накопления"), // хз что это!?))
 			tgbotapi.NewKeyboardButton("⬅ В меню"),
 		),
 	)

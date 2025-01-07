@@ -43,7 +43,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		_, _ = bot.Send(newMsg)
 
 	// напоминания об оплате
-	case "💡 Напоминание":
+	case "🛎 Напоминание":
 		notion := buttonCreator.CreateNotionButtons()
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выберите тип напоминания")
 		msg.ReplyMarkup = notion
@@ -51,7 +51,7 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 			log.Info("Failed to send main menu: %v", log.With("error", err))
 		}
 
-	case "📅 Регулярный платёж":
+	case "🔁 Регулярный платёж":
 		// создаем мапу для работы с напоминаниями
 		notion.StartReminder(bot, update)
 		reminder := buttonCreator.CreateFreqButtons()
