@@ -2,8 +2,8 @@ package notion
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/internal/notion/rules_for_notion"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	rules_for_notion "cachManagerApp/app/internal/notion/rules-for-notion"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"cachManagerApp/database"
 	"log/slog"
 	"strconv"

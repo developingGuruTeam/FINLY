@@ -1,8 +1,8 @@
 package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForTransaction"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	methods_for_transactions "cachManagerApp/app/internal/methods-for-transactions"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 	"strconv"
 	"sync"

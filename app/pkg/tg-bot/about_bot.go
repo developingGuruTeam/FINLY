@@ -1,7 +1,7 @@
 package tg_bot
 
 import (
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"

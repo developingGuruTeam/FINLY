@@ -2,7 +2,7 @@ package test_for_analytic
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
+	expenses "cachManagerApp/app/internal/methods-for-analytic/methods-for-expenses"
 	"cachManagerApp/app/internal/tests/mocks"
 	"testing"
 	"time"
@@ -107,7 +107,7 @@ func TestWeekAnalytic(t *testing.T) {
 			t.Fatalf("failed to setup mock DB: %v", err)
 		}
 
-		expHandler := &methodsForExpenses.ExpensesHandler{DB: gormDB}
+		expHandler := &expenses.ExpensesHandler{DB: gormDB}
 
 		// Подготовим ожидаемые данные
 		mockRows := sqlmock.NewRows([]string{"category", "value"}).
@@ -165,7 +165,7 @@ func TestMonthAnalytic(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to setup mock DB: %v", err)
 		}
-		expHandler := &methodsForExpenses.ExpensesHandler{DB: gormDB}
+		expHandler := &expenses.ExpensesHandler{DB: gormDB}
 		mockRows := sqlmock.NewRows([]string{"category", "value"}).
 			AddRow("Food", 100).
 			AddRow("Transport", 50)

@@ -1,9 +1,9 @@
 package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
+	methods_for_summary "cachManagerApp/app/internal/methods-for-analytic/methods-for-summary"
 	"cachManagerApp/app/internal/notion"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -23,21 +23,21 @@ func PushOnAnalyticButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCr
 		}
 
 	case "💲Сальдо за неделю":
-		summary, err := methodsForSummary.AnalyseBySaldoWeek(update)
+		summary, err := methods_for_summary.AnalyseBySaldoWeek(update)
 		if err != nil {
 			log.Info("Failed to get summary in the week period: %v", slog.Any("error", err))
 		}
-		response := methodsForSummary.GenerateWeeklySaldoReport(summary, currency)
+		response := methods_for_summary.GenerateWeeklySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
 		newMsg.ParseMode = "Markdown"
 		_, _ = bot.Send(newMsg)
 
 	case "💰Сальдо за месяц":
-		summary, err := methodsForSummary.AnalyseBySaldoMonth(update)
+		summary, err := methods_for_summary.AnalyseBySaldoMonth(update)
 		if err != nil {
 			log.Info("Failed to get summary in the month period: %v", slog.Any("error", err))
 		}
-		response := methodsForSummary.GenerateMonthlySaldoReport(summary, currency)
+		response := methods_for_summary.GenerateMonthlySaldoReport(summary, currency)
 		newMsg := tgbotapi.NewMessage(update.Message.Chat.ID, response)
 		newMsg.ParseMode = "Markdown"
 		_, _ = bot.Send(newMsg)

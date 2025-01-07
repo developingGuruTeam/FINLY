@@ -2,8 +2,8 @@ package tg_bot
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/internal/methodsForUser"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	methods_for_user "cachManagerApp/app/internal/methods-for-user"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"cachManagerApp/database"
 	"fmt"
 	"log/slog"

@@ -1,9 +1,9 @@
 package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForUser"
+	methods_for_user "cachManagerApp/app/internal/methods-for-user"
 	"cachManagerApp/app/internal/notion"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 	"os"
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"cachManagerApp/app/config"
-	"cachManagerApp/app/pkg/TgBot"
 	"cachManagerApp/app/pkg/logger/slog_init"
+	tg_bot "cachManagerApp/app/pkg/tg-bot"
 	"cachManagerApp/database"
 	"sync"
 )
