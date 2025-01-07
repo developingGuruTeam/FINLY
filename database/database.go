@@ -49,9 +49,9 @@ func ConnectionDB(log *slog.Logger) {
 	log.Info("Миграции успешно выполнены")
 
 	// Очистка операций
-	db.Exec("DELETE FROM transactions")
+	//db.Exec("DELETE FROM transactions")
 
 	// Очистка таблицы пользователей
-	db.Exec("DELETE FROM users")
+	//db.Exec("DELETE FROM users")
 
 }
