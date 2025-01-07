@@ -45,7 +45,7 @@ func GenerateDailyIncomeReport(transactions []models.Transactions, currency stri
 
 	for _, inc := range transactions {
 		// +3 часа к времени чтобы было по мск делаю временно. НАДО В БД ПОСТАВИТЬ НАШЕ ВРЕМЯ по умолчанию!!! либо как-то к юсеру привязаться
-		localTime := inc.CreatedAt.Add(3 * time.Hour)
+		localTime := inc.CreatedAt
 		formattedTime := localTime.Format("15:04")
 
 		report += fmt.Sprintf("▪ *%s*\n", inc.Category)
