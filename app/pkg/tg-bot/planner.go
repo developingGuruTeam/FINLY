@@ -23,11 +23,11 @@ func SendNotificationToUser(bot *tgbotapi.BotAPI, chatID int64, userName string,
 	if clearName == "" {
 		clearName = userName
 	}
-	message := fmt.Sprintf("Привет, %s 👋!\nНе забывай записывать свои приходы и расходы, чтобы вести их учет 🧮", clearName)
+	message := fmt.Sprintf("_Привет, %s 👋!\nНе забывай записывать свои приходы и расходы, чтобы вести их учет_🧮", clearName)
 
 	// Создаем объект сообщения
 	msg := tgbotapi.NewMessage(chatID, message)
-
+	msg.ParseMode = "markdown"
 	// Отправляем сообщение пользователю
 	if _, err := bot.Send(msg); err != nil {
 		log.Error("Ошибка отправки сообщения:", slog.Any("error", err))
