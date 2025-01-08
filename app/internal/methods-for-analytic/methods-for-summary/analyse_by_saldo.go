@@ -1,13 +1,14 @@
-package methodsForSummary
+package methods_for_summary
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
+	expenses "cachManagerApp/app/internal/methods-for-analytic/methods-for-expenses"
+	incomes "cachManagerApp/app/internal/methods-for-analytic/methods-for-incomes"
 	"cachManagerApp/database"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"math/rand"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 var (
@@ -16,8 +17,8 @@ var (
 
 // анализ сальдо за неделю
 func AnalyseBySaldoWeek(update tgbotapi.Update) (models.Summary, error) {
-	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
-	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
+	analyticExpenses := expenses.ExpensesHandler{DB: database.DB}
+	analyticIncomes := incomes.AnalyticHandler{DB: database.DB}
 	var summary models.Summary
 
 	if database.DB == nil {
@@ -97,8 +98,8 @@ func GenerateWeeklySaldoReport(sum models.Summary, currency string) string {
 
 // анализ сальдо за месяц
 func AnalyseBySaldoMonth(update tgbotapi.Update) (models.Summary, error) {
-	analyticExpenses := methodsForExpenses.ExpensesHandler{DB: database.DB}
-	analyticIncomes := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
+	analyticExpenses := expenses.ExpensesHandler{DB: database.DB}
+	analyticIncomes := incomes.AnalyticHandler{DB: database.DB}
 	var summary models.Summary
 	if database.DB == nil {
 		return models.Summary{}, fmt.Errorf("ошибка подключения к БД в аналитике сальдо")

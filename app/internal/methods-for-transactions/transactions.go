@@ -1,4 +1,4 @@
-package methodsForTransaction
+package methods_for_transactions
 
 import (
 	"cachManagerApp/app/db/models"

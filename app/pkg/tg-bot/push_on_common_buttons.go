@@ -1,10 +1,10 @@
-package TgBot
+package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForExpenses"
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForIncomeAnalys"
-	"cachManagerApp/app/internal/methodsForAnalytic/methodsForSummary"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	methods_for_expences "cachManagerApp/app/internal/methods-for-analytic/methods-for-expenses"
+	methods_for_incomes "cachManagerApp/app/internal/methods-for-analytic/methods-for-incomes"
+	summary "cachManagerApp/app/internal/methods-for-analytic/methods-for-summary"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"cachManagerApp/database"
 	"fmt"
 	"log/slog"
@@ -12,7 +12,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
+func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator buttons_create.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 	currency, _ := CurrencyFromChatID(chatID)
 
@@ -82,7 +82,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 
 	case "/hi":
 		// оставил одну инлайн команду 1 - для того что показать есть такой функционал, 2 - просто в прикол пообщаться пользователю
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, ButtonsCreate.RandomTextForHi())
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, buttons_create.RandomTextForHi())
 		if _, err := bot.Send(msg); err != nil {
 			log.Error("Failed to send /help message:", slog.Any("error", err))
 		}
@@ -309,7 +309,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📈 Отчет за день":
-		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+		analyticHandler := methods_for_incomes.AnalyticHandler{DB: database.DB} // Подключение к базе
 
 		// Получаем данные за день
 		transactions, err := analyticHandler.IncomeDayAnalytic(update)
@@ -321,14 +321,14 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Формируем текст отчёта
-		report := methodsForIncomeAnalys.GenerateDailyIncomeReport(transactions, currency)
+		report := methods_for_incomes.GenerateDailyIncomeReport(transactions, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
 		msg.ParseMode = "Markdown"
 		_, _ = bot.Send(msg)
 		handled = true
 
 	case "📈 Отчет за неделю":
-		dbConn := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB}
+		dbConn := methods_for_incomes.AnalyticHandler{DB: database.DB}
 
 		// Получаем данные за неделю
 		incomeSummary, err := dbConn.IncomeWeekAnalytic(update)
@@ -340,10 +340,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Генерируем текстовый отчет
-		report := methodsForIncomeAnalys.GenerateWeeklyIncomeReport(incomeSummary, currency)
+		report := methods_for_incomes.GenerateWeeklyIncomeReport(incomeSummary, currency)
 
 		// Генерируем диаграмму
-		chartURL, err := methodsForIncomeAnalys.GenerateWeeklyIncomePieChartURL(incomeSummary)
+		chartURL, err := methods_for_incomes.GenerateWeeklyIncomePieChartURL(incomeSummary)
 		if err != nil {
 			log.Error("Ошибка генерации диаграммы:", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s\n(Диаграмму построить не удалось)", report))
@@ -365,7 +365,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📈 Отчет за месяц":
-		analyticHandler := methodsForIncomeAnalys.AnalyticHandler{DB: database.DB} // Подключение к базе
+		analyticHandler := methods_for_incomes.AnalyticHandler{DB: database.DB} // Подключение к базе
 
 		// Получаем данные за месяц
 		transactions, totalIncome, err := analyticHandler.IncomeMonthAnalytic(update)
@@ -377,10 +377,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		}
 
 		// Генерируем текстовый отчёт
-		report := methodsForIncomeAnalys.GenerateMonthlyIncomeReport(transactions, currency)
+		report := methods_for_incomes.GenerateMonthlyIncomeReport(transactions, currency)
 
 		// Генерируем URL диаграммы
-		chartURL, err := methodsForIncomeAnalys.GenerateIncomePieChartURL(transactions, totalIncome)
+		chartURL, err := methods_for_incomes.GenerateIncomePieChartURL(transactions, totalIncome)
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Ошибка генерации диаграммы. Попробуйте позже.")
 			_, _ = bot.Send(msg)
@@ -412,7 +412,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📉 Отчет за день":
-		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		dbConn := methods_for_expences.ExpensesHandler{DB: database.DB}
 		expenses, err := dbConn.ExpenseDayAnalytic(update)
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
@@ -420,14 +420,14 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			log.Info("Ошибка получения данных за день", slog.Any("error", err))
 			return
 		}
-		report := methodsForExpenses.GenerateDailyExpenseReport(expenses, currency)
+		report := methods_for_expences.GenerateDailyExpenseReport(expenses, currency)
 		msg := tgbotapi.NewMessage(chatID, report)
 		msg.ParseMode = "Markdown"
 		_, _ = bot.Send(msg)
 		handled = true
 
 	case "📉 Отчет за неделю":
-		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		dbConn := methods_for_expences.ExpensesHandler{DB: database.DB}
 		expenses, err := dbConn.ExpenseWeekAnalytic(update) // Получаем данные за неделю
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
@@ -436,10 +436,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			return
 		}
 
-		report := methodsForExpenses.GenerateWeeklyExpensesReport(expenses, currency) // отчет
+		report := methods_for_expences.GenerateWeeklyExpensesReport(expenses, currency) // отчет
 
 		// строим диаграмму
-		chartURL, err := methodsForExpenses.GenerateWeeklyExpensePieChartURL(expenses)
+		chartURL, err := methods_for_expences.GenerateWeeklyExpensePieChartURL(expenses)
 		if err != nil {
 			log.Info("Ошибка генерации диаграммы", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s\n(Диаграмму построить не удалось)", report))
@@ -461,7 +461,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 		handled = true
 
 	case "📉 Отчет за месяц":
-		dbConn := methodsForExpenses.ExpensesHandler{DB: database.DB}
+		dbConn := methods_for_expences.ExpensesHandler{DB: database.DB}
 		expenses, err := dbConn.ExpenseMonthAnalytic(update)
 		if err != nil {
 			msg := tgbotapi.NewMessage(chatID, "Не удалось получить данные. Попробуйте позже.")
@@ -469,10 +469,10 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 			log.Info("Ошибка получения данных по расходам за месяц", slog.Any("error", err))
 			return
 		}
-		report := methodsForExpenses.GenerateMonthlyExpensesReport(expenses, currency)
+		report := methods_for_expences.GenerateMonthlyExpensesReport(expenses, currency)
 
 		// строим диаграмму
-		chartURL, err := methodsForExpenses.GenerateExpensePieChartURL(expenses)
+		chartURL, err := methods_for_expences.GenerateExpensePieChartURL(expenses)
 		if err != nil {
 			log.Info("Ошибка генерации диаграммы", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("%s\n(Диаграмму построить не удалось)", report))
@@ -531,7 +531,7 @@ func handleButtonPress(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreat
 	case "🧮 Статистика":
 		dbConn := database.DB
 		userID := update.Message.From.ID
-		report := methodsForSummary.GenerateStatisticsReport(userID, dbConn)
+		report := summary.GenerateStatisticsReport(userID, dbConn)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, report)
 		msg.ParseMode = "Markdown"
 		if _, err := bot.Send(msg); err != nil {

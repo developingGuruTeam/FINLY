@@ -2,8 +2,8 @@ package main
 
 import (
 	"cachManagerApp/app/config"
-	"cachManagerApp/app/pkg/TgBot"
 	"cachManagerApp/app/pkg/logger/slog_init"
+	tg_bot "cachManagerApp/app/pkg/tg-bot"
 	"cachManagerApp/database"
 	"sync"
 )
@@ -26,7 +26,7 @@ func main() {
 			}
 		}()
 
-		if _, err := TgBot.ConnectToTgBot(log); err != nil {
+		if _, err := tg_bot.ConnectToTgBot(log); err != nil {
 			log.Error("Ошибка подключения к Telegram боту: %s", "err", err)
 		}
 	}()

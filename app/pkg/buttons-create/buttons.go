@@ -1,4 +1,4 @@
-package ButtonsCreate
+package buttons_create
 
 import (
 	"math/rand"

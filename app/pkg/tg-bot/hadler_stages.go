@@ -1,8 +1,8 @@
-package TgBot
+package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForTransaction"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	methods_for_transactions "cachManagerApp/app/internal/methods-for-transactions"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 	"strconv"
 	"sync"
@@ -31,7 +31,7 @@ var (
 )
 
 // обработка нажатий на кнопки (команда приходит сюда)
-func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
+func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator buttons_create.TelegramButtonCreator, log *slog.Logger) {
 	if update.Message != nil {
 		chatID := update.Message.Chat.ID
 
@@ -46,7 +46,7 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 		if ok3 {
 			if update.Message.Text == "⤵️ Пропустить" {
 				// сохраняем транзакцию без коммента
-				transaction := methodsForTransaction.TransactionsMethod{}
+				transaction := methods_for_transactions.TransactionsMethod{}
 				if err := transaction.PostTransactionWithComment(update, val3.Category, val3.Amount, "", log); err != nil {
 					log.Info("Failed to save transaction without comment: %s", slog.Any("error", err))
 					msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")
@@ -64,7 +64,7 @@ func PushOnButton(bot *tgbotapi.BotAPI, update tgbotapi.Update, buttonCreator Bu
 
 			// сохраняем транзакцию с коммента
 			comment := update.Message.Text
-			transaction := methodsForTransaction.TransactionsMethod{}
+			transaction := methods_for_transactions.TransactionsMethod{}
 			if err := transaction.PostTransactionWithComment(update, val3.Category, val3.Amount, comment, log); err != nil {
 				log.Info("Failed to save transaction with comment: %s", slog.Any("error", err))
 				msg := tgbotapi.NewMessage(chatID, "❌ Ошибка сохранения транзакции.")

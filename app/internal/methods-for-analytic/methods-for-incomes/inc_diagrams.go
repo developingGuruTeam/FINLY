@@ -1,4 +1,4 @@
-package methodsForIncomeAnalys
+package methods_for_incomes
 
 import (
 	"encoding/json"

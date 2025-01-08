@@ -1,4 +1,4 @@
-package testForUserMethods
+package test_for_user_methods
 
 import (
 	"cachManagerApp/app/db/models"

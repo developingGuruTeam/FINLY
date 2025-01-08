@@ -1,9 +1,9 @@
-package TgBot
+package tg_bot
 
 import (
 	"cachManagerApp/app/db/models"
-	"cachManagerApp/app/internal/methodsForUser"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	methods_for_user "cachManagerApp/app/internal/methods-for-user"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"cachManagerApp/database"
 	"fmt"
 	"log/slog"
@@ -15,7 +15,7 @@ import (
 )
 
 // обработчик действий пользователя для изменения имени и валюты
-func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp UserResponse, buttonCreator ButtonsCreate.TelegramButtonCreator, log *slog.Logger) {
+func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp UserResponse, buttonCreator buttons_create.TelegramButtonCreator, log *slog.Logger) {
 	chatID := update.Message.Chat.ID
 
 	switch userResp.Action {
@@ -43,7 +43,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 		}
 
 		// обновляем имя пользователя
-		user := methodsForUser.UserMethod{}
+		user := methods_for_user.UserMethod{}
 		if err := user.UpdateUserName(update); err != nil {
 			log.Error("Ошибка обновления имени пользователя", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении имени.")
@@ -71,7 +71,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 			return
 		}
 		// обновляем валюту пользователя
-		user := methodsForUser.UserMethod{}
+		user := methods_for_user.UserMethod{}
 		if err := user.UpdateUserCurrency(update); err != nil {
 			log.Error("Ошибка обновления валюты", slog.Any("error", err))
 			msg := tgbotapi.NewMessage(chatID, "❌ Ошибка при обновлении валюты")
@@ -89,7 +89,7 @@ func handleUserAction(bot *tgbotapi.BotAPI, update tgbotapi.Update, userResp Use
 }
 
 // возврат кнопок меню и удаления состояния после обработки транзакции
-func returnToMainMenu(bot *tgbotapi.BotAPI, chatID int64, buttonCreator ButtonsCreate.TelegramButtonCreator, msg string) {
+func returnToMainMenu(bot *tgbotapi.BotAPI, chatID int64, buttonCreator buttons_create.TelegramButtonCreator, msg string) {
 	// создаем кнопки главного меню
 	mainMenu := buttonCreator.CreateMainMenuButtons()
 

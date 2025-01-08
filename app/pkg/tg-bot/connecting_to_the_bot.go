@@ -1,9 +1,9 @@
-package TgBot
+package tg_bot
 
 import (
-	"cachManagerApp/app/internal/methodsForUser"
+	methods_for_user "cachManagerApp/app/internal/methods-for-user"
 	"cachManagerApp/app/internal/notion"
-	"cachManagerApp/app/pkg/ButtonsCreate"
+	buttons_create "cachManagerApp/app/pkg/buttons-create"
 	"log/slog"
 	"os"
 
@@ -30,14 +30,15 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 	notion.StartReminderServiceWithCron(bot, log)
 
 	// старт всех кнопок
-	buttonCreator := ButtonsCreate.TelegramButtonCreator{}
+	buttonCreator := buttons_create.TelegramButtonCreator{}
 
 	for update := range updates {
 		if update.Message != nil {
 			switch update.Message.Text {
+			// базовый дефолтный старт!!!
 			case "/start":
 
-				userHandler := &methodsForUser.UserMethod{}
+				userHandler := &methods_for_user.UserMethod{}
 				if err := userHandler.PostUser(update, log); err != nil {
 					log.Info("Ошибка при добавлении пользователя:", slog.Any("error", err))
 				} else {
@@ -49,6 +50,16 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 
 				// отправляем стартовое сообщение
 				WelcomeMessage(bot, update.Message.Chat.ID, buttonCreator, log)
+
+			// сообщение от админов
+			case "/send_admin_message":
+				if isAdmin(update.Message.Chat.ID) { // Проверяем, является ли отправитель администратором
+					message := "🎉 _Со Старым Новым годом!\nПусть этот год будет наполнен радостью, счастьем и финансовыми успехами!_ 🐙"
+					SendOneTimeNotificationToAll(bot, message, log)
+				} else {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "🚫 У вас нет прав для выполнения этой команды.")
+					bot.Send(msg)
+				}
 
 			default:
 				// обработчик
