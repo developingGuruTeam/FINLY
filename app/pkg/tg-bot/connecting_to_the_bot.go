@@ -35,6 +35,7 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 	for update := range updates {
 		if update.Message != nil {
 			switch update.Message.Text {
+			// базовый дефолтный старт!!!
 			case "/start":
 
 				userHandler := &methods_for_user.UserMethod{}
@@ -49,6 +50,16 @@ func ConnectToTgBot(log *slog.Logger) (*tgbotapi.BotAPI, error) {
 
 				// отправляем стартовое сообщение
 				WelcomeMessage(bot, update.Message.Chat.ID, buttonCreator, log)
+
+			// сообщение от админов
+			case "/send_admin_message":
+				if isAdmin(update.Message.Chat.ID) { // Проверяем, является ли отправитель администратором
+					message := "🎉 _Со Старым Новым годом!\nПусть этот год будет наполнен радостью, счастьем и финансовыми успехами!_ 🐙"
+					SendOneTimeNotificationToAll(bot, message, log)
+				} else {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "🚫 У вас нет прав для выполнения этой команды.")
+					bot.Send(msg)
+				}
 
 			default:
 				// обработчик
