@@ -43,8 +43,8 @@ func ScheduleNotifications(bot *tgbotapi.BotAPI, chatID int64, userName string, 
 	}
 	scheduler := gocron.NewScheduler(time.Local)
 
-	// scheduler.Cron("*/1 * * * *").Do(func() { // временная хрень для тестов уведомление раз в минуту НЕ УДАЛЯТЬ!
-	scheduler.Cron("0 12 * * *").Do(func() { // БОЕВАЯ ЧАСТЬ! это уведомление на каждый день в 12 (по факту 12 + 3 часа для мск)
+	//scheduler.Cron("*/1 * * * *").Do(func() { // временная хрень для тестов уведомление раз в минуту НЕ УДАЛЯТЬ!
+	scheduler.Cron("0 12 * * *").Do(func() { // БОЕВАЯ ЧАСТЬ! это уведомление на каждый день в 12 (по факту 15 часа для мск)
 		SendNotificationToUser(bot, chatID, userName, log) // Отправляем уведомление
 	})
 

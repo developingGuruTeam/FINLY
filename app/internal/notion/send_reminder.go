@@ -15,7 +15,7 @@ func StartReminderServiceWithCron(bot *tgbotapi.BotAPI, log *slog.Logger) {
 	c := cron.New()
 
 	// "0 11 * * *" означает "каждый день в 11:00"
-	c.AddFunc("0 11 * * *", func() { // использует локально время сервера
+	c.AddFunc("0 10 * * *", func() { // использует локально время сервера
 		err := processReminders(bot, log)
 		if err != nil {
 			log.Error(
@@ -70,7 +70,7 @@ func sendReminders(bot *tgbotapi.BotAPI, userID uint64, reminders []models.Remin
 		return
 	}
 
-	text := "🛎 *Напоминание* \n\n Не забудьте сегодня оплатить платеж(и):\n"
+	text := "🛎 *Напоминание* \n\n Не забудьте сегодня совершить платеж(и):\n"
 	for i, reminder := range reminders {
 		text += fmt.Sprintf(
 			"%d.%s\n  Сумма: %d\n\n",
